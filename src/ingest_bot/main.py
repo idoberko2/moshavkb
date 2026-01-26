@@ -16,7 +16,7 @@ logging.basicConfig(
 def main():
     token = os.getenv("TELEGRAM_INGESTION_BOT_TOKEN")
     if not token:
-        print("Error: TELEGRAM_INGESTION_BOT_TOKEN not found in environment variables.")
+        logging.error("Error: TELEGRAM_INGESTION_BOT_TOKEN not found in environment variables.")
         return
 
     # Increase timeouts for stability
@@ -27,10 +27,10 @@ def main():
     
     # Debug handler
     async def debug_msg(update: Update, context):
-        print(f"DEBUG: Received message: {update.message}")
+        logging.debug(f"DEBUG: Received message: {update.message}")
         if update.message.document:
-             print(f"DEBUG: Document: {update.message.document}")
-             print(f"DEBUG: Mime: {update.message.document.mime_type}")
+             logging.debug(f"DEBUG: Document: {update.message.document}")
+             logging.debug(f"DEBUG: Mime: {update.message.document.mime_type}")
 
     application.add_handler(MessageHandler(filters.ALL, debug_msg))
     
@@ -40,7 +40,7 @@ def main():
 
     application.add_error_handler(error_handler)
     
-    print("Bot is starting polling...")
+    logging.info("Bot is starting polling...")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":

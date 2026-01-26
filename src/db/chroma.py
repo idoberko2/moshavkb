@@ -2,11 +2,14 @@ import chromadb
 from chromadb.config import Settings
 from src.config import config
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 def get_client():
     """
     Returns a ChromaDB client. 
-    If running locally without docker, it might fall back to local mode if host not found, 
+    If running locally without docker, it might fall back to local mode if host is set, 
     but primarily properly configured for Docker.
     """
     # Check if we are running inside docker or locally
@@ -15,7 +18,7 @@ def get_client():
     try:
         return chromadb.HttpClient(host=config.CHROMA_HOST, port=config.CHROMA_PORT)
     except Exception:
-        print("Could not connect to Chroma HTTP Server, falling back to local persistence (for testing only).")
+        logger.warning("Could not connect to Chroma HTTP Server, falling back to local persistence (for testing only).")
         return chromadb.PersistentClient(path="./data/chroma_persist")
 
 def get_collection():
@@ -23,9 +26,9 @@ def get_collection():
     # verify connection
     try:
         client.heartbeat()
-        print("Connected to ChromaDB")
+        logger.info("Connected to ChromaDB")
     except Exception as e:
-        print(f"Warning: Could not connect to ChromaDB: {e}")
+        logger.warning(f"Warning: Could not connect to ChromaDB: {e}")
 
     return client.get_or_create_collection(name=config.COLLECTION_NAME)
 
@@ -44,4 +47,4 @@ def add_document(doc_data):
         metadatas=[doc_data['metadata']],
         ids=[doc_data['id']]
     )
-    print(f"Added document: {doc_data['id']}")
+    logger.info(f"Added document: {doc_data['id']}")

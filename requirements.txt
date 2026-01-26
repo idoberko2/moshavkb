@@ -2,5 +2,6 @@ chromadb
 pymupdf
 openai
 python-dotenv
-watchdog
+openai
+python-dotenv
 python-telegram-bot

@@ -2,10 +2,15 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from src.storage.local import LocalStorage
 from src.config import config
+from src.ingest.parser import parse_pdf
+from src.db.chroma import add_document
 import os
+import logging
+import asyncio
+
+logger = logging.getLogger(__name__)
 
 # Initialize storage
-# In a larger app this would be dependency injected
 storage = LocalStorage(config.DOCUMENT_DIR)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -21,7 +26,6 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Please send a PDF file.")
         return
 
-    # Check file size (e.g. limit to 20MB)
     if document.file_size > 20 * 1024 * 1024:
          await update.message.reply_text("File is too large. Limit is 20MB.")
          return
@@ -32,18 +36,36 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
         file = await context.bot.get_file(document.file_id)
         file_name = document.file_name
         
-        # Determine unique filename to prevent overwrites or handle it in storage
-        # For now, we trust the storage provider handles it or we overwrite
-        # Ideally, prepend timestamp or uuid
-        
-        # Download to memory (bytearray)
         file_content = await file.download_as_bytearray()
-        
-        # Save using abstraction
         saved_path = storage.save_file(file_content, file_name)
         
-        await status_msg.edit_text(f"File saved successfully! Processing started... 🚀\nID: {file_name}")
+        await status_msg.edit_text(f"File saved! Processing... ⚙️")
+
+        # Process document (sync wrapper)
+        # In production this might be offloaded to a queue, but here we do it inline or in thread
+        loop = asyncio.get_event_loop()
+        success = await loop.run_in_executor(None, process_document, saved_path)
+        
+        if success:
+             await status_msg.edit_text(f"Successfully processed and indexed: {file_name} ✅")
+        else:
+             await status_msg.edit_text(f"Failed to process: {file_name} ❌")
         
     except Exception as e:
-        print(f"Error handling file: {e}")
-        await status_msg.edit_text("An error occurred while saving the file.")
+        logger.error(f"Error handling file: {e}")
+        await status_msg.edit_text("An error occurred while handling the file.")
+
+def process_document(filepath: str) -> bool:
+    try:
+        logger.info(f"Processing document: {filepath}")
+        doc_data = parse_pdf(filepath)
+        if doc_data:
+            add_document(doc_data)
+            logger.info(f"Successfully processed: {filepath}")
+            return True
+        else:
+            logger.warning(f"Empty or invalid document: {filepath}")
+            return False
+    except Exception as e:
+        logger.error(f"Error processing document {filepath}: {e}")
+        return False

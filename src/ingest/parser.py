@@ -1,6 +1,9 @@
 import fitz  # PyMuPDF
 import os
+import logging
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 def parse_pdf(filepath: str):
     """
@@ -30,5 +33,5 @@ def parse_pdf(filepath: str):
             "id": os.path.basename(filepath) # Using filename as ID for now
         }
     except Exception as e:
-        print(f"Error parsing {filepath}: {e}")
+        logger.error(f"Error parsing {filepath}: {e}")
         return None
