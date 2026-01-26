@@ -1,0 +1,5 @@
+chromadb
+pymupdf
+openai
+python-dotenv
+watchdog

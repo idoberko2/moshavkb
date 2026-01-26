@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # Antigravity Application
+  mkb-app:
+    build: .
+    container_name: mkb-app
+    volumes:
+      - .:/app
+      - ./data:/app/data
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - CHROMA_HOST=chroma-db
+      - DOCUMENT_DIR=/app/data/documents
+    depends_on:
+      - chroma-db
+    restart: always
+
+  # ChromaDB Vector Store
+  chroma-db:
+    image: chromadb/chroma:latest
+    container_name: chroma-db
+    volumes:
+      - chroma-data:/chroma/persist
+    ports:
+      - "8000:8000"
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSIST_DIRECTORY=/chroma/persist
+    restart: always
+
+volumes:
+  chroma-data:

@@ -1,0 +1,5 @@
+rawdocs
+venv
+.venv
+data
+*.pyc
