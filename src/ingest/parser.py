@@ -16,7 +16,7 @@ def parse_pdf(filepath: str):
         doc = fitz.open(filepath)
         text = ""
         for page in doc:
-            text += page.get_text()
+            text += page.get_text() + "\n"
             
         base_metadata = {
             "filename": os.path.basename(filepath),
