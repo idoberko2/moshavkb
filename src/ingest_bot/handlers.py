@@ -19,6 +19,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Send me a PDF file and I will add it to the knowledge base."
     )
 
+from src.auth import auth_required, AuthRole
+
+@auth_required(AuthRole.INGEST)
 async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     document = update.message.document
     

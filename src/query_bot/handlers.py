@@ -13,6 +13,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "אתה מוזמן לשאול אותי כל שאלה לגבי הפרוטוקולים וההחלטות במושב, ואנסה לענות על בסיס המידע הקיים."
     )
 
+from src.auth import auth_required, AuthRole
+
+@auth_required(AuthRole.QUERY)
 @track
 async def handle_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query_text = update.message.text

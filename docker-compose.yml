@@ -18,6 +18,8 @@ services:
       - DOCUMENT_DIR=/app/data/documents
       - CHROMA_HOST=chroma-db
       - CHROMA_PORT=8000
+      - QUERY_ALLOWED_USERS=${QUERY_ALLOWED_USERS}
+      - QUERY_ALLOWED_GROUPS=${QUERY_ALLOWED_GROUPS}
     depends_on:
       - chroma-db
     restart: always
@@ -37,6 +39,8 @@ services:
       - DOCUMENT_DIR=/app/data/documents
       - CHROMA_HOST=chroma-db
       - CHROMA_PORT=8000
+      - INGEST_ALLOWED_USERS=${INGEST_ALLOWED_USERS}
+      - INGEST_ALLOWED_GROUPS=${INGEST_ALLOWED_GROUPS}
     depends_on:
       - chroma-db
     restart: always
