@@ -21,6 +21,8 @@ def get_client():
         logger.warning("Could not connect to Chroma HTTP Server, falling back to local persistence (for testing only).")
         return chromadb.PersistentClient(path="./data/chroma_persist")
 
+from chromadb.utils import embedding_functions
+
 def get_collection():
     client = get_client()
     # verify connection
@@ -30,7 +32,15 @@ def get_collection():
     except Exception as e:
         logger.warning(f"Warning: Could not connect to ChromaDB: {e}")
 
-    return client.get_or_create_collection(name=config.COLLECTION_NAME)
+    openai_ef = embedding_functions.OpenAIEmbeddingFunction(
+        api_key=config.OPENAI_API_KEY,
+        model_name="text-embedding-3-small"
+    )
+
+    return client.get_or_create_collection(
+        name=config.COLLECTION_NAME,
+        embedding_function=openai_ef
+    )
 
 def add_document(doc_data):
     """
