@@ -58,10 +58,10 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def process_document(filepath: str) -> bool:
     try:
         logger.info(f"Processing document: {filepath}")
-        doc_data = parse_pdf(filepath)
-        if doc_data:
-            add_document(doc_data)
-            logger.info(f"Successfully processed: {filepath}")
+        chunks = parse_pdf(filepath)
+        if chunks:
+            add_document(chunks)
+            logger.info(f"Successfully processed {len(chunks)} chunks from: {filepath}")
             return True
         else:
             logger.warning(f"Empty or invalid document: {filepath}")

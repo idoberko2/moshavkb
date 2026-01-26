@@ -42,19 +42,20 @@ def get_collection():
         embedding_function=openai_ef
     )
 
-def add_document(doc_data):
+def add_document(doc_data_list):
     """
-    Adds a document to the collection.
-    doc_data expected: {'text': str, 'metadata': dict, 'id': str}
+    Adds a list of document chunks to the collection.
+    doc_data_list expected: List of {'text': str, 'metadata': dict, 'id': str}
     """
     collection = get_collection()
     
-    if not doc_data or not doc_data['text']:
+    if not doc_data_list:
         return
 
+    # Bulk upsert
     collection.upsert(
-        documents=[doc_data['text']],
-        metadatas=[doc_data['metadata']],
-        ids=[doc_data['id']]
+        documents=[d['text'] for d in doc_data_list],
+        metadatas=[d['metadata'] for d in doc_data_list],
+        ids=[d['id'] for d in doc_data_list]
     )
-    logger.info(f"Added document: {doc_data['id']}")
+    logger.info(f"Added {len(doc_data_list)} document chunks.")
