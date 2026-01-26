@@ -1,6 +1,25 @@
 version: '3.8'
 
 services:
+  # Telegram Bot (Query/RAG)
+  mkb-query-bot:
+    build: .
+    container_name: mkb-query-bot
+    volumes:
+      - .:/app
+      - ./data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TELEGRAM_QUERY_BOT_TOKEN=${TELEGRAM_QUERY_BOT_TOKEN}
+      - DOCUMENT_DIR=/app/data/documents
+      - CHROMA_HOST=chroma-db
+      - CHROMA_PORT=8000
+    depends_on:
+      - chroma-db
+    restart: always
+    command: python -m src.query_bot.main
+
   # Telegram Bot (Ingestion)
   mkb-ingest-bot:
     build: .
