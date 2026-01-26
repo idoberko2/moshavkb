@@ -5,3 +5,4 @@ python-dotenv
 openai
 python-dotenv
 python-telegram-bot
+opik

@@ -2,6 +2,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from src.rag.search import search_similar_docs
 from src.rag.generator import generate_answer
+from opik import track
 import logging
 
 logger = logging.getLogger(__name__)
@@ -12,6 +13,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "אתה מוזמן לשאול אותי כל שאלה לגבי הפרוטוקולים וההחלטות במושב, ואנסה לענות על בסיס המידע הקיים."
     )
 
+@track
 async def handle_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query_text = update.message.text
     

@@ -1,5 +1,6 @@
 import os
 import logging
+import opik
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 from src.query_bot.handlers import start, handle_query
@@ -19,6 +20,13 @@ def main():
     if not token:
         logger.error("Error: TELEGRAM_QUERY_BOT_TOKEN not found in environment variables.")
         return
+    
+    # Initialize Opik (reads config from env vars: OPIK_API_KEY, OPIK_PROJECT_NAME, etc.)
+    try:
+        opik.configure(use_local=False)
+        logger.info("Opik configured successfully.")
+    except Exception as e:
+        logger.warning(f"Failed to configure Opik: {e}")
 
     # Increase timeouts for stability
     application = ApplicationBuilder().token(token).read_timeout(60).write_timeout(60).connect_timeout(60).build()

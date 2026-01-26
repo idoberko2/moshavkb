@@ -1,9 +1,11 @@
 import logging
 from src.db.chroma import get_collection
 from src.config import config
+from opik import track
 
 logger = logging.getLogger(__name__)
 
+@track
 def search_similar_docs(query_text: str, n_results: int = 5):
     """
     Searches for documents in ChromaDB similar to the query text.

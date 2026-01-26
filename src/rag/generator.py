@@ -1,6 +1,7 @@
 import logging
 from openai import OpenAI
 from src.config import config
+from opik import track
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,7 @@ Example System Prompt (Hebrew):
 {context}
 """
 
+@track
 def generate_answer(query: str, context_chunks: list) -> str:
     """
     Generates an answer using OpenAI based on the query and context.
