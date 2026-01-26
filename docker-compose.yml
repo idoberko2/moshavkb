@@ -51,13 +51,9 @@ services:
     image: chromadb/chroma:latest
     container_name: chroma-db
     volumes:
-      - chroma-data:/chroma/persist
+      - ./data/chroma_db:/data
     ports:
       - "8000:8000"
     environment:
       - IS_PERSISTENT=TRUE
-      - PERSIST_DIRECTORY=/chroma/persist
     restart: always
-
-volumes:
-  chroma-data:
