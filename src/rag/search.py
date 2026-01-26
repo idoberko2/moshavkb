@@ -37,11 +37,44 @@ def search_similar_docs(query_text: str, n_results: int = 5):
             metadata = results['metadatas'][0][i] if results['metadatas'] else {}
             doc_id = results['ids'][0][i] if results['ids'] else "unknown"
             
-            # Optional: Filter by distance if available and needed
-            # distance = results['distances'][0][i] if 'distances' in results else 0
+            # Context Expansion: Fetch neighbors
+            expanded_text = doc_text
+            try:
+                chunk_index = metadata.get('chunk_index')
+                filename = metadata.get('filename')
+                
+                print(f"DEBUG: Processing doc_id={doc_id}, index={chunk_index}, file={filename}")
+
+                if chunk_index is not None and filename is not None:
+                    # Construct neighbor IDs
+                    prev_id = f"{filename}_part_{int(chunk_index) - 1}"
+                    next_id = f"{filename}_part_{int(chunk_index) + 1}"
+                    
+                    print(f"DEBUG: Fetching neighbors: {prev_id}, {next_id}")
+                    
+                    # Fetch them
+                    neighbors = collection.get(ids=[prev_id, next_id])
+                    print(f"DEBUG: Got neighbors result ids: {neighbors.get('ids')}")
+                    
+                    neighbor_map = {}
+                    if neighbors['ids']:
+                        for j, nid in enumerate(neighbors['ids']):
+                            neighbor_map[nid] = neighbors['documents'][j]
+                            
+                    # Merge text
+                    if prev_id in neighbor_map:
+                        expanded_text = neighbor_map[prev_id] + "\n" + expanded_text
+                        print(f"DEBUG: Merged prev chunk")
+                        
+                    if next_id in neighbor_map:
+                        expanded_text = expanded_text + "\n" + neighbor_map[next_id]
+                        print(f"DEBUG: Merged next chunk")
+                        
+            except Exception as e:
+                print(f"Failed to fetch neighbors for {doc_id}: {e}")
             
             formatted_results.append({
-                "text": doc_text,
+                "text": expanded_text,
                 "metadata": metadata,
                 "id": doc_id
             })

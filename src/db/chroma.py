@@ -52,10 +52,17 @@ def add_document(doc_data_list):
     if not doc_data_list:
         return
 
+    # Filter out empty or whitespace-only chunks
+    valid_docs = [d for d in doc_data_list if d.get('text') and d['text'].strip()]
+    
+    if not valid_docs:
+        logger.warning("No valid (non-empty) chunks to add.")
+        return
+
     # Bulk upsert
     collection.upsert(
-        documents=[d['text'] for d in doc_data_list],
-        metadatas=[d['metadata'] for d in doc_data_list],
-        ids=[d['id'] for d in doc_data_list]
+        documents=[d['text'] for d in valid_docs],
+        metadatas=[d['metadata'] for d in valid_docs],
+        ids=[d['id'] for d in valid_docs]
     )
-    logger.info(f"Added {len(doc_data_list)} document chunks.")
+    logger.info(f"Added {len(valid_docs)} document chunks.")

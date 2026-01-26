@@ -25,11 +25,17 @@ class S3Storage(StorageProvider):
                     aws_access_key_id=config.S3_ACCESS_KEY_ID,
                     aws_secret_access_key=config.S3_SECRET_ACCESS_KEY,
                     region_name=self.region_name,
-                    config=BotoConfig(signature_version='s3v4')
+                    config=BotoConfig(
+                        signature_version='s3v4',
+                        retries={
+                            'max_attempts': 10,
+                            'mode': 'adaptive'
+                        }
+                    )
                 )
                 
-                print(f"DEBUG: Initialized S3 Storage provider.")
-                logger.info(f"Initialized S3 Storage provider.")
+                print(f"DEBUG: Initialized S3 Storage provider with adaptive retries.")
+                logger.info(f"Initialized S3 Storage provider with adaptive retries.")
                 logger.info(f"DEBUG: Using S3 Access Key: {config.S3_ACCESS_KEY_ID[:4]}***")
                 
                 # Ensure bucket exists (helpful for local MinIO)

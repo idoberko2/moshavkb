@@ -27,7 +27,7 @@ async def process_query_logic(query_text: str) -> dict:
     Core logic for handling a query. Returns a dict containing 'answer' and 'sources' list.
     """
     # 1. Retrieve relevant chunks
-    chunks = search_similar_docs(query_text, n_results=8)
+    chunks = search_similar_docs(query_text, n_results=20)
     
     logger.debug(f"DEBUG: Retrieved {len(chunks)} chunks.")
     
