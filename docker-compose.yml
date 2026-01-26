@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # Antigravity Application
+  # Antigravity Application (Watcher/Ingestion)
   mkb-app:
     build: .
     container_name: mkb-app
@@ -9,12 +9,31 @@ services:
       - .:/app
       - ./data:/app/data
     environment:
+      - PYTHONUNBUFFERED=1
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - CHROMA_HOST=chroma-db
       - DOCUMENT_DIR=/app/data/documents
     depends_on:
       - chroma-db
     restart: always
+    command: python -m src.main
+
+  # Telegram Bot (Ingestion)
+  mkb-ingest-bot:
+    build: .
+    container_name: mkb-ingest-bot
+    volumes:
+      - .:/app
+      - ./data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TELEGRAM_INGESTION_BOT_TOKEN=${TELEGRAM_INGESTION_BOT_TOKEN}
+      - DOCUMENT_DIR=/app/data/documents
+    depends_on:
+      - chroma-db
+    restart: always
+    command: python -m src.ingest_bot.main
 
   # ChromaDB Vector Store
   chroma-db:
