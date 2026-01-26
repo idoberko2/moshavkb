@@ -15,8 +15,8 @@ class LocalStorage(StorageProvider):
         return filepath
 
     def list_files(self) -> List[str]:
-        files = []
-        for root, _, filenames in os.walk(self.base_dir):
-            for filename in filenames:
-                files.append(os.path.join(root, filename))
-        return files
+        return [f for f in os.listdir(self.base_dir) if os.path.isfile(os.path.join(self.base_dir, f))]
+
+    def get_file_link(self, filename: str) -> str | None:
+        # Local storage doesn't support web links
+        return None

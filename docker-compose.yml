@@ -57,3 +57,17 @@ services:
     environment:
       - IS_PERSISTENT=TRUE
     restart: always
+
+  minio:
+    image: minio/minio:latest
+    container_name: moshavkb-minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    volumes:
+      - ./data/minio:/data
+    restart: always

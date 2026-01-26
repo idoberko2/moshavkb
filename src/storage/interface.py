@@ -12,3 +12,9 @@ class StorageProvider(Protocol):
         Lists available files in the storage.
         """
         ...
+
+    def get_file_link(self, filename: str) -> str | None:
+        """
+        Returns a shareable link for the file, or None if not supported.
+        """
+        ...

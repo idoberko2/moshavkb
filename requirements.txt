@@ -7,3 +7,5 @@ python-dotenv
 python-telegram-bot
 opik
 pytest
+boto3
+requests

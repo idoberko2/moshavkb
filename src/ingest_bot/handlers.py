@@ -1,6 +1,6 @@
 from telegram import Update
 from telegram.ext import ContextTypes
-from src.storage.local import LocalStorage
+from src.storage.s3 import S3Storage
 from src.config import config
 from src.ingest.parser import parse_pdf
 from src.db.chroma import add_document
@@ -11,7 +11,7 @@ import asyncio
 logger = logging.getLogger(__name__)
 
 # Initialize storage
-storage = LocalStorage(config.DOCUMENT_DIR)
+storage = S3Storage()
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -45,9 +45,9 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await status_msg.edit_text(f"File saved! Processing... ⚙️")
 
         # Process document (sync wrapper)
-        # In production this might be offloaded to a queue, but here we do it inline or in thread
         loop = asyncio.get_event_loop()
-        success = await loop.run_in_executor(None, process_document, saved_path)
+        # Pass file_content to avoid needing local file
+        success = await loop.run_in_executor(None, process_document, file_name, file_content)
         
         if success:
              await status_msg.edit_text(f"Successfully processed and indexed: {file_name} ✅")
@@ -58,10 +58,10 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Error handling file: {e}")
         await status_msg.edit_text("An error occurred while handling the file.")
 
-def process_document(filepath: str) -> bool:
+def process_document(filepath: str, file_content: bytes = None) -> bool:
     try:
         logger.info(f"Processing document: {filepath}")
-        chunks = parse_pdf(filepath)
+        chunks = parse_pdf(filepath, file_content)
         if chunks:
             add_document(chunks)
             logger.info(f"Successfully processed {len(chunks)} chunks from: {filepath}")
