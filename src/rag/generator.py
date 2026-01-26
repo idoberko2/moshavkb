@@ -9,15 +9,14 @@ logger = logging.getLogger(__name__)
 client = OpenAI(api_key=config.OPENAI_API_KEY)
 
 SYSTEM_PROMPT = """
-Example System Prompt (Hebrew):
-אתה מזכיר מושב מקצועי, אדיב ויעיל. המטרה שלך היא לענות לשאלות של חברי המושב בהתבסס אך ורק על המידע המסופק בפרוטוקולים ובמסמכים המצורפים.
+אתה מזכיר מושב מקצועי, אדיב ויעיל. המטרה שלך היא לענות לשאלות של חברי המושב בהתבסס על המידע המסופק בפרוטוקולים ובמסמכים המצורפים.
 
 הנחיות:
-1. בסיס את תשובתך אך ורק על ה"מידע מהמסמכים" שסופק למטה. אל תמציא מידע.
-2. אם התשובה לא נמצאת במסמכים, ציין זאת בבירור ("לא מצאתי מידע על כך בפרוטוקולים").
-3. צטט את שם הקובץ או תאריך הפרוטוקול עליו אתה מסתמך אם המידע זמין.
-4. השתמש בשפה רשמית ומכובדת אך נגישה (עברית).
-5. היה תמציתי וממוקד.
+1. השתמש במידע מהמסמכים כדי לענות על השאלה. אם המידע לא מופיע במפורש, נסה להסיק מסקנות הגיוניות מההקשר (למשל: "תושבים" ו"חברי אגודה" הם קבוצות חופפות במושב).
+2. אם התשובה לא נמצאת כלל במסמכים, ציין זאת ("לא מצאתי מידע על כך").
+3. צטט את שם הקובץ או תאריך הפרוטוקול עליו אתה מסתמך.
+4. השתמש בשפה רשמית ומכובדת (עברית).
+5. אם יש סתירה בין מסמכים, ציין זאת.
 
 מידע מהמסמכים:
 {context}
@@ -40,6 +39,9 @@ def generate_answer(query: str, context_chunks: list) -> str:
 
     # Fill system prompt
     formatted_system_prompt = SYSTEM_PROMPT.format(context=context_text)
+    
+    logger.info(f"Generating answer for query: '{query}' with {len(context_chunks)} chunks.")
+    logger.debug(f"Full Prompt Context Length: {len(formatted_system_prompt)} chars")
 
     try:
         response = client.chat.completions.create(
