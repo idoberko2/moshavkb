@@ -13,8 +13,9 @@ class StorageProvider(Protocol):
         """
         ...
 
-    def get_file_link(self, filename: str) -> str | None:
+    def get_file_stream(self, filename: str):
         """
-        Returns a shareable link for the file, or None if not supported.
+        Returns a file-like object (stream) for the file, or None if not found.
+        The caller is responsible for closing the stream.
         """
         ...

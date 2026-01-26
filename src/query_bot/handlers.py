@@ -22,13 +22,14 @@ storage = S3Storage()
 
 
 @track
-async def process_query_logic(query_text: str) -> str:
+async def process_query_logic(query_text: str) -> dict:
     """
-    Core logic for handling a query. Returns the final formatted response text.
-    Wrapped with @track to ensure Opik captures the input and output.
+    Core logic for handling a query. Returns a dict containing 'answer' and 'sources' list.
     """
     # 1. Retrieve relevant chunks
-    chunks = search_similar_docs(query_text, n_results=5)
+    chunks = search_similar_docs(query_text, n_results=8)
+    
+    logger.debug(f"DEBUG: Retrieved {len(chunks)} chunks.")
     
     # 2. Generate answer
     response_data = generate_answer(query_text, chunks)
@@ -42,34 +43,9 @@ async def process_query_logic(query_text: str) -> str:
         try:
             response_data = json.loads(response_data)
         except:
-            return response_data # Raw string
+             return {"answer": response_data, "sources": []}
             
-        answer_text = response_data
-        sources = []
-    else:
-        answer_text = response_data.get("answer", "No answer generated.")
-        sources = response_data.get("sources", [])
-    
-    # Escape the main answer text to ensure valid HTML
-    import html
-    answer_text = html.escape(answer_text)
-
-    # 3. Process links
-    if isinstance(sources, list) and sources:
-        links_section = "\n\n📂 <b>קבצים רלוונטיים להורדה:</b>\n"
-        added_links = False
-        for filename in sources:
-            link = storage.get_file_link(filename)
-            if link:
-                 clean_filename = html.escape(filename)
-                 # Use double quotes for href
-                 links_section += f'• <a href="{link}">{clean_filename}</a>\n'
-                 added_links = True
-        
-        if added_links:
-            answer_text += links_section
-            
-    return answer_text
+    return response_data
 
 @auth_required(AuthRole.QUERY)
 async def handle_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -83,11 +59,31 @@ async def handle_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     try:
         # Run the tracked logic
-        final_response = await process_query_logic(query_text)
+        result = await process_query_logic(query_text)
+        answer_text = result.get("answer", "No answer.")
+        sources = result.get("sources", [])
         
-        # 4. Reply with HTML parse mode
+        # 3. Reply with text
+        # Escape HTML chars for safety
+        import html
+        answer_text = html.escape(answer_text)
+        
         from telegram.constants import ParseMode
-        await status_msg.edit_text(final_response, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
+        await status_msg.edit_text(answer_text, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
+        
+        # 4. Send Files
+        if sources:
+            await update.message.reply_text("📂 **קבצים מצורפים:**", parse_mode='Markdown')
+            for filename in sources:
+                try:
+                    file_stream = storage.get_file_stream(filename)
+                    if file_stream:
+                        await update.message.reply_document(document=file_stream, filename=filename)
+                    else:
+                        await update.message.reply_text(f"⚠️ לא ניתן היה לאתר את הקובץ: {filename}")
+                except Exception as e:
+                     logger.error(f"Failed to send file {filename}: {e}")
+                     await update.message.reply_text(f"⚠️ שגיאה בשליחת הקובץ: {filename}")
         
     except Exception as e:
         logger.error(f"Error handling query: {e}")

@@ -28,21 +28,7 @@ class S3Storage(StorageProvider):
                     config=BotoConfig(signature_version='s3v4')
                 )
                 
-                # Separate client for signing URLs (using public endpoint)
-                # This works because generating presigned URLs is an offline operation
-                self.signing_client = boto3.client(
-                    's3',
-                    endpoint_url=config.S3_PUBLIC_ENDPOINT_URL,
-                    aws_access_key_id=config.S3_ACCESS_KEY_ID,
-                    aws_secret_access_key=config.S3_SECRET_ACCESS_KEY,
-                    region_name=self.region_name,
-                    config=BotoConfig(signature_version='s3v4')
-                )
-
                 print(f"DEBUG: Initialized S3 Storage provider.")
-                print(f"DEBUG: Internal Endpoint: {config.S3_ENDPOINT_URL}")
-                print(f"DEBUG: Public Endpoint (for links): {config.S3_PUBLIC_ENDPOINT_URL}")
-                
                 logger.info(f"Initialized S3 Storage provider.")
                 logger.info(f"DEBUG: Using S3 Access Key: {config.S3_ACCESS_KEY_ID[:4]}***")
                 
@@ -94,26 +80,16 @@ class S3Storage(StorageProvider):
             logger.error(f"Failed to list files from S3: {e}")
             return []
 
-    def get_file_link(self, filename: str, expiration=3600) -> str | None:
+    def get_file_stream(self, filename: str):
         """
-        Generate a presigned URL to share an S3 object
+        Returns a streaming body for the S3 object
         """
-        # Use signing_client if available, else fallback to standard client
-        client = getattr(self, 'signing_client', self.s3_client)
-        
-        if not client:
+        if not self.s3_client:
             return None
 
         try:
-            url = client.generate_presigned_url(
-                'get_object',
-                Params={
-                    'Bucket': self.bucket_name, 
-                    'Key': filename
-                },
-                ExpiresIn=expiration
-            )
-            return url
+            response = self.s3_client.get_object(Bucket=self.bucket_name, Key=filename)
+            return response['Body']
         except ClientError as e:
-            logger.error(f"Error generating presigned URL for {filename}: {e}")
+            logger.error(f"Error getting file stream for {filename}: {e}")
             return None

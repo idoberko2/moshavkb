@@ -53,16 +53,7 @@ def generate_answer(query: str, context_chunks: list) -> dict:
     logger.info(f"Generating answer for query: '{query}' with {len(context_chunks)} chunks.")
     
     try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": formatted_system_prompt},
-                {"role": "user", "content": query}
-            ],
-            temperature=0.3,
-            max_tokens=500,
-            response_format={"type": "json_object"}
-        )
+        response = call_llm(formatted_system_prompt, query)
         
         content = response.choices[0].message.content.strip()
         return json.loads(content)
@@ -73,3 +64,17 @@ def generate_answer(query: str, context_chunks: list) -> dict:
             "answer": "מצטער, אירעה שגיאה בעת ניסיון ליצור את התשובה.",
             "sources": []
         }
+
+
+@track
+def call_llm(system_prompt: str, query: str) -> dict:
+    return client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": query}
+        ],
+        temperature=0.3,
+        max_tokens=500,
+        response_format={"type": "json_object"}
+    )

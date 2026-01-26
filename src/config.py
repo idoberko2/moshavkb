@@ -23,8 +23,7 @@ class Config:
         self.S3_SECRET_ACCESS_KEY = os.getenv("S3_SECRET_ACCESS_KEY", "minioadmin")
         self.S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "moshavkb")
         self.S3_REGION_NAME = os.getenv("S3_REGION_NAME", "us-east-1")
-        # Public endpoint for generating pre-signed URLs (user browser access)
-        self.S3_PUBLIC_ENDPOINT_URL = os.getenv("S3_PUBLIC_ENDPOINT_URL", "http://127.0.0.1:9000")
+
 
     @staticmethod
     def _parse_id_list(env_var_name: str) -> list[int]:
