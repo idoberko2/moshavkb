@@ -2,11 +2,12 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from src.storage.s3 import S3Storage
 from src.config import config
-from src.ingest.parser import parse_pdf
-from src.db.chroma import add_document
-import os
-import logging
 import asyncio
+import hashlib
+from src.db import chroma
+from src.ingest.parser import parse_pdf
+import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -47,10 +48,16 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Process document (sync wrapper)
         loop = asyncio.get_event_loop()
         # Pass file_content to avoid needing local file
-        success = await loop.run_in_executor(None, process_document, file_name, file_content)
+        status, msg = await loop.run_in_executor(None, process_document, file_name, file_content)
         
-        if success:
+        if status == "SUCCESS":
              await status_msg.edit_text(f"Successfully processed and indexed: {file_name} ✅")
+        elif status == "DUPLICATE_SAME_NAME":
+             await status_msg.edit_text(f"File '{file_name}' already exists! 🔄")
+        elif status == "DUPLICATE_DIFF_NAME":
+             await status_msg.edit_text(f"File content already exists as '{msg}'! 🔄")
+        elif status == "NO_TEXT":
+             await status_msg.edit_text(f"Could not extract text from: {file_name} ⚠️")
         else:
              await status_msg.edit_text(f"Failed to process: {file_name} ❌")
         
@@ -58,17 +65,45 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Error handling file: {e}")
         await status_msg.edit_text("An error occurred while handling the file.")
 
-def process_document(filepath: str, file_content: bytes = None) -> bool:
+def process_document(file_name, file_content):
+    """
+    Sync function to process the document:
+    1. Calculate Hash
+    2. Check Existence
+    3. Save to S3 (if new)
+    4. Parse & Index
+    """
     try:
-        logger.info(f"Processing document: {filepath}")
-        chunks = parse_pdf(filepath, file_content)
-        if chunks:
-            add_document(chunks)
-            logger.info(f"Successfully processed {len(chunks)} chunks from: {filepath}")
-            return True
-        else:
-            logger.warning(f"Empty or invalid document: {filepath}")
-            return False
+        # 1. Calculate MD5 Hash
+        md5_hash = hashlib.md5(file_content).hexdigest()
+        logger.info(f"Calculated hash for {file_name}: {md5_hash}")
+
+        # 2. Check Deduplication
+        existing_filename = chroma.check_file_exists_by_hash(md5_hash)
+        
+        if existing_filename:
+            logger.info(f"Duplicate content detected. File previously uploaded as: {existing_filename}")
+            if existing_filename == file_name:
+                return "DUPLICATE_SAME_NAME", existing_filename
+            else:
+                return "DUPLICATE_DIFF_NAME", existing_filename
+
+        # 3. Save file to storage (only if new)
+        storage.save_file(file_content, file_name)
+        
+        # 4. Parse PDF
+        # We pass the hash so it gets embedded in metadata
+        chunks = parse_pdf(file_name, file_content=file_content, file_hash=md5_hash)
+        
+        if not chunks:
+            logger.warning(f"No text extracted from {file_name}")
+            return "NO_TEXT", None
+            
+        # 5. Add to Chroma
+        chroma.add_document(chunks)
+        
+        return "SUCCESS", None
+
     except Exception as e:
-        logger.error(f"Error processing document {filepath}: {e}")
-        return False
+        logger.error(f"Error processing document {file_name}: {e}")
+        return "ERROR", str(e)

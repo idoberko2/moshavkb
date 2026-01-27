@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 from src.ingest.chunker import chunk_text
 
-def parse_pdf(filepath: str, file_content: bytes = None):
+def parse_pdf(filepath: str, file_content: bytes = None, file_hash: str = None):
     """
     Extracts text and metadata from a PDF file.
     If file_content is provided, parses from memory stream.
@@ -21,6 +21,9 @@ def parse_pdf(filepath: str, file_content: bytes = None):
         else:
             doc = fitz.open(filepath)
             created_at = datetime.fromtimestamp(os.path.getctime(filepath)).isoformat()
+            
+            # If hash not provided and reading from file, calculate it (optional backup)
+            # But the caller should usually provide it.
 
         text = ""
         for page in doc:
@@ -31,6 +34,9 @@ def parse_pdf(filepath: str, file_content: bytes = None):
             "created_at": created_at,
             "page_count": len(doc)
         }
+        
+        if file_hash:
+            base_metadata["file_hash"] = file_hash
         
         # Chunk the text
         text_chunks = chunk_text(text)

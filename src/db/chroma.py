@@ -66,3 +66,30 @@ def add_document(doc_data_list):
         ids=[d['id'] for d in valid_docs]
     )
     logger.info(f"Added {len(valid_docs)} document chunks.")
+
+def check_file_exists_by_hash(file_hash: str) -> str | None:
+    """
+    Check if a file with the given MD5 hash already exists in the collection.
+    Returns the filename if found, otherwise None.
+    """
+    try:
+        collection = get_collection()
+        results = collection.get(
+            where={"file_hash": file_hash},
+            limit=1,
+            include=["metadatas"]
+        )
+        
+        if results and results['metadatas'] and len(results['metadatas']) > 0:
+            # Return the filename of the first match
+            # Note: results['metadatas'][0] is a dict (if we got one result) or a list? 
+            # Chroma get() returns list of lists for embeddings, but for metadatas it returns a list of metadatas
+            # Actually for simple get() it returns a dictionary where 'metadatas' is a list of dicts.
+            if len(results['metadatas']) > 0:
+                 return results['metadatas'][0].get("filename")
+        
+        return None
+        
+    except Exception as e:
+        logger.error(f"Error checking file hash: {e}")
+        return None
