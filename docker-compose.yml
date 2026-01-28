@@ -20,6 +20,7 @@ services:
       - CHROMA_PORT=8000
       - QUERY_ALLOWED_USERS=${QUERY_ALLOWED_USERS}
       - QUERY_ALLOWED_GROUPS=${QUERY_ALLOWED_GROUPS}
+      - ANONYMIZED_TELEMETRY=False
     depends_on:
       - chroma-db
     restart: always
@@ -41,6 +42,7 @@ services:
       - CHROMA_PORT=8000
       - INGEST_ALLOWED_USERS=${INGEST_ALLOWED_USERS}
       - INGEST_ALLOWED_GROUPS=${INGEST_ALLOWED_GROUPS}
+      - ANONYMIZED_TELEMETRY=False
     depends_on:
       - chroma-db
     restart: always
@@ -56,6 +58,7 @@ services:
       - "8000:8000"
     environment:
       - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=False
     restart: always
 
   minio:
