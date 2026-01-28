@@ -10,6 +10,13 @@ from botocore.exceptions import ClientError
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+
 def backup_chroma_to_s3():
     # Configuration
     s3_bucket = os.getenv("S3_BACKUP_BUCKET_NAME")
@@ -61,6 +68,17 @@ def backup_chroma_to_s3():
             aws_secret_access_key=s3_secret_key,
             region_name=s3_region
         )
+        
+        try:
+            s3_client.head_bucket(Bucket=s3_bucket)
+        except ClientError:
+            logger.info(f"Bucket {s3_bucket} not found. Creating...")
+            try:
+                s3_client.create_bucket(Bucket=s3_bucket)
+            except ClientError as e:
+                logger.error(f"Failed to create bucket {s3_bucket}: {e}")
+                return
+
         
         s3_client.upload_file(local_backup_path, s3_bucket, s3_backup_key)
         logger.info("Backup uploaded successfully.")

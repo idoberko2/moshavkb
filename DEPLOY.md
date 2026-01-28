@@ -107,3 +107,21 @@ If the VPS data is lost:
     - Extract it to `~/moshavkb/data/chroma_db`.
     - `tar -xzvf chroma_backup_YYYYMMDD_HHMMSS.tar.gz -C ~/moshavkb/data/chroma_db`
 3.  Start the application.
+
+## Restoration (Manual)
+
+To restore the vector database from a specific backup file:
+
+1.  Find the backup filename in your S3 bucket (e.g., `chroma_backup_20260128_065504.tar.gz`).
+2.  Stop the services (recommended to avoid locking):
+    ```bash
+    docker compose -f docker-compose.prod.yml stop
+    ```
+3.  Run the restore script:
+    ```bash
+    docker compose -f docker-compose.prod.yml run --rm ingest-bot python scripts/restore_from_s3.py chroma_backup_YYYYMMDD_HHMMSS.tar.gz
+    ```
+4.  Start the services:
+    ```bash
+    docker compose -f docker-compose.prod.yml up -d
+    ```
