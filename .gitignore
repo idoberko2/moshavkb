@@ -6,3 +6,10 @@ __pycache__
 *.pyc
 .env
 VERSION
+*.tfvars
+!terraform.tfvars.example
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup

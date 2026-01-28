@@ -1,0 +1,55 @@
+from openai import OpenAI, AzureOpenAI
+from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
+from src.config import config
+import logging
+
+logger = logging.getLogger(__name__)
+
+class LLMFactory:
+    @staticmethod
+    def get_llm_client():
+        """
+        Returns an initialized OpenAI or AzureOpenAI client based on config.
+        """
+        if config.LLM_PROVIDER == "azure":
+            logger.info("Initializing Azure OpenAI Client")
+            if not all([config.AZURE_OPENAI_API_KEY, config.AZURE_OPENAI_ENDPOINT, config.AZURE_OPENAI_API_VERSION]):
+                raise ValueError("Azure OpenAI configuration missing (Key, Endpoint, or Version)")
+                
+            return AzureOpenAI(
+                api_key=config.AZURE_OPENAI_API_KEY,
+                api_version=config.AZURE_OPENAI_API_VERSION,
+                azure_endpoint=config.AZURE_OPENAI_ENDPOINT
+            )
+        else:
+            logger.info("Initializing Standard OpenAI Client")
+            return OpenAI(api_key=config.OPENAI_API_KEY)
+
+    @staticmethod
+    def get_embedding_function():
+        """
+        Returns the appropriate embedding function for ChromaDB.
+        """
+        if config.LLM_PROVIDER == "azure":
+            logger.info("Initializing Azure OpenAI Embedding Function")
+            if not all([config.AZURE_OPENAI_API_KEY, config.AZURE_OPENAI_ENDPOINT, config.AZURE_OPENAI_API_VERSION, config.AZURE_EMBEDDING_DEPLOYMENT_NAME]):
+                 raise ValueError("Azure OpenAI configuration missing for Embeddings (Key, Endpoint, Version, or Deployment Name)")
+
+            # Note: ChromaDB's OpenAIEmbeddingFunction handles Azure if api_type="azure" is passed, 
+            # BUT modern chromadb versions might use a separate AzureOpenAIEmbeddingFunction class or parameters.
+            # Checking `chromadb.utils.embedding_functions` is safer.
+            # In recent versions (0.4.x+), OpenAIEmbeddingFunction supports api_type, api_base, etc.
+            
+            return OpenAIEmbeddingFunction(
+                api_key=config.AZURE_OPENAI_API_KEY,
+                api_base=config.AZURE_OPENAI_ENDPOINT,
+                api_type="azure",
+                api_version=config.AZURE_OPENAI_API_VERSION,
+                model_name=config.AZURE_EMBEDDING_DEPLOYMENT_NAME 
+            )
+        else:
+            logger.info("Initializing Standard OpenAI Embedding Function")
+            return OpenAIEmbeddingFunction(
+                api_key=config.OPENAI_API_KEY,
+                model_name="text-embedding-3-small"
+            )

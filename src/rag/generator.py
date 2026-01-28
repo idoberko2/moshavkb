@@ -2,11 +2,12 @@ import logging
 from openai import OpenAI
 from src.config import config
 from opik import track
+from src.llm.factory import LLMFactory
 
 logger = logging.getLogger(__name__)
 
-# Initialize OpenAI client
-client = OpenAI(api_key=config.OPENAI_API_KEY)
+# Initialize OpenAI/Azure client
+client = LLMFactory.get_llm_client()
 
 import json
 
@@ -69,7 +70,7 @@ def generate_answer(query: str, context_chunks: list) -> dict:
 @track
 def call_llm(system_prompt: str, query: str) -> dict:
     return client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=config.AZURE_DEPLOYMENT_NAME if config.LLM_PROVIDER == "azure" else "gpt-4o-mini",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": query}

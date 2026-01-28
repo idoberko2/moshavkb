@@ -22,6 +22,7 @@ def get_client():
         return chromadb.PersistentClient(path="./data/chroma_persist")
 
 from chromadb.utils import embedding_functions
+from src.llm.factory import LLMFactory
 
 def get_collection():
     client = get_client()
@@ -32,10 +33,7 @@ def get_collection():
     except Exception as e:
         logger.warning(f"Warning: Could not connect to ChromaDB: {e}")
 
-    openai_ef = embedding_functions.OpenAIEmbeddingFunction(
-        api_key=config.OPENAI_API_KEY,
-        model_name="text-embedding-3-small"
-    )
+    openai_ef = LLMFactory.get_embedding_function()
 
     return client.get_or_create_collection(
         name=config.COLLECTION_NAME,

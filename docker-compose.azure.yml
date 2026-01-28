@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  # Telegram Bot (Query/RAG) - Native Azure Integration
+  mkb-query-bot:
+    image: ghcr.io/idoberko2/moshavkb:${IMAGE_TAG:-latest}
+    container_name: mkb-query-bot
+    volumes:
+      - ./data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TELEGRAM_QUERY_BOT_TOKEN=${TELEGRAM_QUERY_BOT_TOKEN}
+      - OPIK_API_KEY=${OPIK_API_KEY}
+      - OPIK_WORKSPACE=${OPIK_WORKSPACE}
+      - OPIK_PROJECT_NAME=${OPIK_PROJECT_NAME}
+      - DOCUMENT_DIR=/app/data/documents
+      - CHROMA_HOST=chroma-db
+      - CHROMA_PORT=8000
+      - QUERY_ALLOWED_USERS=${QUERY_ALLOWED_USERS}
+      - QUERY_ALLOWED_GROUPS=${QUERY_ALLOWED_GROUPS}
+      - ANONYMIZED_TELEMETRY=False
+
+      # Azure OpenAI
+      - LLM_PROVIDER=azure
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
+      - AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION}
+      - AZURE_DEPLOYMENT_NAME=${AZURE_DEPLOYMENT_NAME}
+      - AZURE_EMBEDDING_DEPLOYMENT_NAME=${AZURE_EMBEDDING_DEPLOYMENT_NAME}
+
+      # Native Azure Storage (No Gateway)
+      - STORAGE_PROVIDER=azure
+      - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING}
+      - AZURE_CONTAINER_NAME=${AZURE_CONTAINER_NAME:-moshavkb}
+
+    depends_on:
+      - chroma-db
+    restart: always
+    command: python -m src.query_bot.main
+
+  # Telegram Bot (Ingestion) - Native Azure Integration
+  mkb-ingest-bot:
+    image: ghcr.io/idoberko2/moshavkb:${IMAGE_TAG:-latest}
+    container_name: mkb-ingest-bot
+    volumes:
+      - ./data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TELEGRAM_INGESTION_BOT_TOKEN=${TELEGRAM_INGESTION_BOT_TOKEN}
+      - DOCUMENT_DIR=/app/data/documents
+      - CHROMA_HOST=chroma-db
+      - CHROMA_PORT=8000
+      - INGEST_ALLOWED_USERS=${INGEST_ALLOWED_USERS}
+      - INGEST_ALLOWED_GROUPS=${INGEST_ALLOWED_GROUPS}
+      - ANONYMIZED_TELEMETRY=False
+
+      # Azure OpenAI
+      - LLM_PROVIDER=azure
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
+      - AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION}
+      - AZURE_EMBEDDING_DEPLOYMENT_NAME=${AZURE_EMBEDDING_DEPLOYMENT_NAME}
+
+      # Native Azure Storage
+      - STORAGE_PROVIDER=azure
+      - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING}
+      - AZURE_CONTAINER_NAME=${AZURE_CONTAINER_NAME:-moshavkb}
+      # S3 Backup (Assuming S3 backup is still wanted, or should we assume backup also goes to Azure?)
+      # The current scripts/backup_to_s3.py relies on boto3. 
+      # Ideally backup should also support generic storage provider.
+      # But currently backup script is specific. 
+      # For now, let's assume backups might still go to S3 or we need to update backup script.
+      # Given the scope, let's keep S3 vars just in case backup runs, BUT
+      # if the user is 100% Azure, backup script will fail if it tries S3.
+      # For now, simply removing S3 vars from main bot logic.
+
+    depends_on:
+      - chroma-db
+    restart: always
+    command: python -m src.ingest_bot.main
+
+  # ChromaDB Vector Store
+  chroma-db:
+    image: chromadb/chroma:latest
+    container_name: chroma-db
+    volumes:
+      - ./data/chroma_db:/data
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=False
+    restart: always

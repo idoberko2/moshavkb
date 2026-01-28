@@ -9,3 +9,4 @@ opik
 pytest
 boto3
 requests
+azure-storage-blob
