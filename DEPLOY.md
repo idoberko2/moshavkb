@@ -108,6 +108,30 @@ If the VPS data is lost:
     - `tar -xzvf chroma_backup_YYYYMMDD_HHMMSS.tar.gz -C ~/moshavkb/data/chroma_db`
 3.  Start the application.
 
+## Using Deployment Scripts (Recommended)
+
+Three helper scripts are available in `deployment_scripts/` for easy management. Copy this folder to your VPS.
+
+### Deploy / Update
+To deploy a specific version (matching a GitHub Release tag):
+```bash
+./deployment_scripts/deploy.sh 1.0.0
+```
+
+### Backup
+To manually trigger a backup to S3:
+```bash
+./deployment_scripts/backup_chroma.sh
+```
+
+### Restore
+To restore from a backup file:
+```bash
+./deployment_scripts/restore_chroma.sh chroma_backup_20260128_120000.tar.gz
+```
+
+## Manual Operations
+
 ## Restoration (Manual)
 
 To restore the vector database from a specific backup file:

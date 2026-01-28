@@ -1,0 +1,8 @@
+deployment_scripts/
+.git/
+.env
+data/
+tests/
+venv/
+__pycache__/
+*.pyc
