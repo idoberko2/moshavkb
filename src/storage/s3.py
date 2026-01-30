@@ -34,7 +34,7 @@ class S3Storage(StorageProvider):
                     )
                 )
                 
-                print(f"DEBUG: Initialized S3 Storage provider with adaptive retries.")
+                # print statement removed
                 logger.info(f"Initialized S3 Storage provider with adaptive retries.")
                 logger.info(f"DEBUG: Using S3 Access Key: {config.S3_ACCESS_KEY_ID[:4]}***")
                 

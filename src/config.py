@@ -38,6 +38,9 @@ class Config:
         self.AZURE_STORAGE_CONNECTION_STRING = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
         self.AZURE_CONTAINER_NAME = os.getenv("AZURE_CONTAINER_NAME", "moshavkb")
         self.AZURE_BACKUP_CONTAINER_NAME = os.getenv("AZURE_BACKUP_CONTAINER_NAME", "moshavkb-backups")
+        
+        # Logging
+        self.LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 
 
     @staticmethod

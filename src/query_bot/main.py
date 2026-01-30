@@ -6,12 +6,14 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, fil
 from src.query_bot.handlers import start, handle_query
 from dotenv import load_dotenv
 
+from src.config import config
+
 # Load env vars
 load_dotenv()
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
+    level=config.LOG_LEVEL
 )
 logger = logging.getLogger(__name__)
 

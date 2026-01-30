@@ -43,18 +43,18 @@ def search_similar_docs(query_text: str, n_results: int = 5):
                 chunk_index = metadata.get('chunk_index')
                 filename = metadata.get('filename')
                 
-                print(f"DEBUG: Processing doc_id={doc_id}, index={chunk_index}, file={filename}")
+                logger.debug(f"DEBUG: Processing doc_id={doc_id}, index={chunk_index}, file={filename}")
 
                 if chunk_index is not None and filename is not None:
                     # Construct neighbor IDs
                     prev_id = f"{filename}_part_{int(chunk_index) - 1}"
                     next_id = f"{filename}_part_{int(chunk_index) + 1}"
                     
-                    print(f"DEBUG: Fetching neighbors: {prev_id}, {next_id}")
+                    logger.debug(f"DEBUG: Fetching neighbors: {prev_id}, {next_id}")
                     
                     # Fetch them
                     neighbors = collection.get(ids=[prev_id, next_id])
-                    print(f"DEBUG: Got neighbors result ids: {neighbors.get('ids')}")
+                    logger.debug(f"DEBUG: Got neighbors result ids: {neighbors.get('ids')}")
                     
                     neighbor_map = {}
                     if neighbors['ids']:
@@ -64,14 +64,14 @@ def search_similar_docs(query_text: str, n_results: int = 5):
                     # Merge text
                     if prev_id in neighbor_map:
                         expanded_text = neighbor_map[prev_id] + "\n" + expanded_text
-                        print(f"DEBUG: Merged prev chunk")
+                        logger.debug(f"DEBUG: Merged prev chunk")
                         
                     if next_id in neighbor_map:
                         expanded_text = expanded_text + "\n" + neighbor_map[next_id]
-                        print(f"DEBUG: Merged next chunk")
+                        logger.debug(f"DEBUG: Merged next chunk")
                         
             except Exception as e:
-                print(f"Failed to fetch neighbors for {doc_id}: {e}")
+                logger.error(f"Failed to fetch neighbors for {doc_id}: {e}")
             
             formatted_results.append({
                 "text": expanded_text,

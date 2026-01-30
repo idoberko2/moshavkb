@@ -5,12 +5,14 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, fil
 from src.ingest_bot.handlers import start, handle_document
 from dotenv import load_dotenv
 
+from src.config import config
+
 # Load env vars if not already loaded (though config usually does it)
 load_dotenv()
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
+    level=config.LOG_LEVEL
 )
 
 def main():
