@@ -73,7 +73,8 @@ resource "azurerm_cognitive_deployment" "chat" {
     version = var.chat_model_version
   }
   scale {
-    type = "GlobalStandard"
+    type     = "GlobalStandard"
+    capacity = 50
   }
 }
 
@@ -86,7 +87,8 @@ resource "azurerm_cognitive_deployment" "embedding" {
     version = var.embedding_model_version
   }
   scale {
-    type = "GlobalStandard"
+    type     = "GlobalStandard"
+    capacity = 50
   }
 }
 

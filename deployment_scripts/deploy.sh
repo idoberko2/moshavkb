@@ -10,7 +10,7 @@ if [ -z "$1" ]; then
 fi
 
 VERSION=$1
-COMPOSE_FILE="docker-compose.azure.yml"
+COMPOSE_FILE="docker-compose.prod.yml"
 
 echo "Deploying version: $VERSION"
 
