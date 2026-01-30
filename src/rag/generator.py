@@ -22,8 +22,11 @@ SYSTEM_PROMPT = """
   "answer": "טקסט התשובה המלא בעברית...",
   "sources": ["file1.pdf", "file2.pdf"]
 }}
-4. שדה 'answer': השתמש בשפה רשמית ומכובדת (עברית). צטט את שם הקובץ או תאריך הפרוטוקול עליו אתה מסתמך בגוף התשובה במידת הצורך. אם יש סתירה בין מסמכים, ציין זאת.
-5. שדה 'sources': רשימת שמות הקבצים המדויקים עליהם התבססת. אל תמציא שמות.
+4. שדה 'answer': השתמש בשפה רשמית ומכובדת (עברית). צטט את שם הקובץ או תאריך הפרוטוקול עליו אתה מסתמך בגוף התשובה במידת הצורך. אם יש סתירה בין מסמכים, ציין זאת. הבא ציטוטים רלוונטיים מתוך המקורות במידת האפשר.
+5. שדה 'sources': רשימת שמות הקבצים המדויקים עליהם התבססת. עליך לבחור אך ורק מתוך הרשימה הבאה:
+{file_list}
+
+אל תמציא שמות ואל תשנה אותם (כולל רווחים).
 
 מידע מהמסמכים:
 {context}
@@ -41,15 +44,8 @@ def generate_answer(query: str, context_chunks: list) -> dict:
             "sources": []
         }
 
-    # Prepare context string
-    context_text = ""
-    for chunk in context_chunks:
-        source = chunk['metadata'].get('filename', 'Unknown Source')
-        text = chunk['text']
-        context_text += f"---\nמקור: {source}\nתוכן: {text}\n"
-
-    # Fill system prompt
-    formatted_system_prompt = SYSTEM_PROMPT.format(context=context_text)
+    # Construct system prompt
+    formatted_system_prompt = construct_system_prompt(context_chunks)
     
     logger.info(f"Generating answer for query: '{query}' with {len(context_chunks)} chunks.")
     
@@ -66,6 +62,26 @@ def generate_answer(query: str, context_chunks: list) -> dict:
             "sources": []
         }
 
+@track
+def construct_system_prompt(context_chunks: list) -> str:
+    """
+    Constructs the system prompt with context and a list of valid filenames.
+    """
+    context_text = ""
+    filenames = set()
+
+    for chunk in context_chunks:
+        source = chunk['metadata'].get('filename', 'Unknown Source')
+        filenames.add(source)
+        text = chunk['text']
+        context_text += f"---\nמקור: {source}\nתוכן: {text}\n"
+
+    # Create a clean list of filenames for the prompt
+    file_list_str = "\n".join([f"- {f}" for f in sorted(list(filenames))])
+
+    # Fill system prompt
+    return SYSTEM_PROMPT.format(file_list=file_list_str, context=context_text)
+
 
 @track
 def call_llm(system_prompt: str, query: str) -> dict:
@@ -76,6 +92,6 @@ def call_llm(system_prompt: str, query: str) -> dict:
             {"role": "user", "content": query}
         ],
         temperature=0.3,
-        max_tokens=500,
+        max_tokens=2000,
         response_format={"type": "json_object"}
     )

@@ -63,6 +63,10 @@ async def handle_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
         answer_text = result.get("answer", "No answer.")
         sources = result.get("sources", [])
         
+        if not isinstance(answer_text, str):
+            logger.warning(f"answer_text is not a string, it is {type(answer_text)}. Content: {answer_text}")
+            answer_text = str(answer_text)
+
         # 3. Reply with text
         # Escape HTML chars for safety
         import html
