@@ -45,7 +45,8 @@ class LLMFactory:
                 api_base=config.AZURE_OPENAI_ENDPOINT,
                 api_type="azure",
                 api_version=config.AZURE_OPENAI_API_VERSION,
-                model_name=config.AZURE_EMBEDDING_DEPLOYMENT_NAME 
+                model_name=config.AZURE_EMBEDDING_DEPLOYMENT_NAME,
+                deployment_id=config.AZURE_EMBEDDING_DEPLOYMENT_NAME
             )
         else:
             logger.info("Initializing Standard OpenAI Embedding Function")

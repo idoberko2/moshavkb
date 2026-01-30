@@ -1,6 +1,6 @@
 from telegram import Update
 from telegram.ext import ContextTypes
-from src.storage.s3 import S3Storage
+from src.storage.factory import StorageFactory
 from src.config import config
 import asyncio
 import hashlib
@@ -12,7 +12,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Initialize storage
-storage = S3Storage()
+storage = StorageFactory.get_storage_provider()
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -34,16 +34,16 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
          await update.message.reply_text("File is too large. Limit is 20MB.")
          return
 
-    status_msg = await update.message.reply_text("Downloading file...")
+    status_msg = await update.message.reply_text("מוריד קובץ...")
     
     try:
         file = await context.bot.get_file(document.file_id)
         file_name = document.file_name
         
+        # converted to bytes in process_document or storage
         file_content = await file.download_as_bytearray()
-        saved_path = storage.save_file(file_content, file_name)
         
-        await status_msg.edit_text(f"File saved! Processing... ⚙️")
+        await status_msg.edit_text(f"מעבד... ⚙️")
 
         # Process document (sync wrapper)
         loop = asyncio.get_event_loop()

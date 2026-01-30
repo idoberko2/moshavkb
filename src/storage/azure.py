@@ -2,6 +2,7 @@ from src.config import config
 from src.storage.interface import StorageProvider
 import logging
 from azure.core.exceptions import ResourceExistsError
+from azure.storage.blob import BlobServiceClient
 from io import BytesIO
 
 logger = logging.getLogger(__name__)
@@ -41,13 +42,17 @@ class AzureStorage(StorageProvider):
             return ""
 
         try:
+            # Convert bytearray to bytes if needed, or wrap in BytesIO
+            if isinstance(file_data, bytearray):
+                file_data = bytes(file_data)
+            
             blob_client = self.container_client.get_blob_client(filename)
             logger.info(f"Uploading {filename} to Azure container {self.container_name}...")
             blob_client.upload_blob(file_data, overwrite=True)
             return filename
         except Exception as e:
             logger.error(f"Failed to upload {filename} to Azure: {e}")
-            return ""
+            raise e
 
     def list_files(self) -> list[str]:
         if not self.container_client:

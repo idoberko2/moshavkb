@@ -13,11 +13,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "אתה מוזמן לשאול אותי כל שאלה לגבי הפרוטוקולים וההחלטות במושב, ואנסה לענות על בסיס המידע הקיים."
     )
 
-from src.storage.s3 import S3Storage
+from src.storage.factory import StorageFactory
 from src.auth import auth_required, AuthRole
 
 # Initialize storage (dynamic based on config)
-storage = S3Storage()
+storage = StorageFactory.get_storage_provider()
 
 
 
