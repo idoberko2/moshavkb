@@ -56,11 +56,11 @@ resource "random_id" "random" {
 
 # --- Azure OpenAI ---
 resource "azurerm_cognitive_account" "openai" {
-  name                = "${var.resource_group_name}-openai-${random_id.random.hex}"
-  location            = var.openai_location
-  resource_group_name = azurerm_resource_group.rg.name
-  kind                = "OpenAI"
-  sku_name            = var.openai_sku_name
+  name                  = "${var.resource_group_name}-openai-${random_id.random.hex}"
+  location              = var.openai_location
+  resource_group_name   = azurerm_resource_group.rg.name
+  kind                  = "OpenAI"
+  sku_name              = var.openai_sku_name
   custom_subdomain_name = "${var.resource_group_name}-openai-${random_id.random.hex}"
 }
 
@@ -111,7 +111,7 @@ resource "azurerm_public_ip" "pip" {
   resource_group_name = azurerm_resource_group.rg.name
   location            = var.location
   allocation_method   = "Static"
-  sku                 = "Standard" 
+  sku                 = "Standard"
 }
 
 resource "azurerm_network_security_group" "nsg" {
@@ -127,7 +127,7 @@ resource "azurerm_network_security_group" "nsg" {
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "22"
-    source_address_prefix      = "*" 
+    source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
 }
@@ -174,7 +174,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
   source_image_reference {
     publisher = "Canonical"
     offer     = "0001-com-ubuntu-server-jammy"
-    sku       = "22_04-lts" 
+    sku       = "22_04-lts-arm64"
     version   = "latest"
   }
 
@@ -222,7 +222,7 @@ chmod 600 /home/${var.admin_username}/moshavkb/.env
 
 echo "Deployment credentials injected to /home/${var.admin_username}/moshavkb/.env"
 EOF
-)
+  )
 }
 
 output "public_ip" {

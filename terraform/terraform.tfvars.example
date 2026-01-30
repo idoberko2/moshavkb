@@ -1,6 +1,6 @@
 resource_group_name = "resource group name"
-location            = "Israel Central"
-vm_size             = "Standard_B1ms"
+location            = "France Central"
+vm_size             = "Standard_B2pls_v2"
 admin_username      = "adminuser"
 public_key_path     = "~/.ssh/id_rsa.pub"
 storage_account_prefix = "storage account prefix"

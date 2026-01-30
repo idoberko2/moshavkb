@@ -13,7 +13,7 @@ variable "rg_location" {
 variable "location" {
   description = "Azure Region"
   type        = string
-  default     = "Israel Central"
+  default     = "France Central"
 }
 
 variable "openai_location" {
@@ -55,7 +55,7 @@ variable "tfstate_container_name" {
 variable "vm_size" {
   description = "Size of the Virtual Machine"
   type        = string
-  default     = "Standard_B1ms"
+  default     = "Standard_B2pls_v2"
 }
 
 variable "admin_username" {
@@ -86,7 +86,7 @@ variable "chat_model_name" {
 variable "chat_model_version" {
   description = "Model version for Chat"
   type        = string
-  default     = "2024-07-18" 
+  default     = "2024-07-18"
 }
 
 variable "embedding_model_name" {
