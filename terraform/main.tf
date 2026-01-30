@@ -194,8 +194,12 @@ echo \
 apt-get update
 apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
+
 # Setup App directory
 mkdir -p /home/${var.admin_username}/moshavkb
+
+# Add user to docker group
+usermod -aG docker ${var.admin_username}
 
 # Inject Credentials into .env file
 cat <<EOT >> /home/${var.admin_username}/moshavkb/.env
@@ -217,7 +221,7 @@ STORAGE_PROVIDER="azure"
 EOT
 
 # Set Permissions
-chown ${var.admin_username}:${var.admin_username} /home/${var.admin_username}/moshavkb/.env
+chown -R ${var.admin_username}:${var.admin_username} /home/${var.admin_username}/moshavkb
 chmod 600 /home/${var.admin_username}/moshavkb/.env
 
 echo "Deployment credentials injected to /home/${var.admin_username}/moshavkb/.env"
