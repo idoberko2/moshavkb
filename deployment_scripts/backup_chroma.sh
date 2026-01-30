@@ -15,5 +15,5 @@ else
 fi
 
 echo "Starting ChromaDB Backup..."
-docker compose -f $COMPOSE_FILE run --rm mkb-ingest-bot python scripts/backup_to_s3.py
+docker compose -f $COMPOSE_FILE run --rm mkb-ingest-bot python -m scripts.backup
 echo "Backup command finished."

@@ -8,9 +8,9 @@ from io import BytesIO
 logger = logging.getLogger(__name__)
 
 class AzureStorage(StorageProvider):
-    def __init__(self):
+    def __init__(self, container_name: str = None):
         self.connection_string = config.AZURE_STORAGE_CONNECTION_STRING
-        self.container_name = config.AZURE_CONTAINER_NAME
+        self.container_name = container_name or config.AZURE_CONTAINER_NAME
         
         self.blob_service_client = None
         self.container_client = None
