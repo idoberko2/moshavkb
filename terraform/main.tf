@@ -43,6 +43,12 @@ resource "azurerm_storage_container" "sc_backup" {
   container_access_type = "private"
 }
 
+resource "azurerm_storage_container" "sc_test" {
+  name                  = "tests"
+  storage_account_name  = azurerm_storage_account.sa.name
+  container_access_type = "private"
+}
+
 resource "azurerm_storage_container" "sc_tfstate" {
   name                  = var.tfstate_container_name
   storage_account_name  = azurerm_storage_account.sa.name
