@@ -2,11 +2,10 @@ chromadb-client
 pymupdf
 openai
 python-dotenv
-openai
-python-dotenv
 python-telegram-bot
 opik
 pytest
 boto3
 requests
 azure-storage-blob
+azure-ai-formrecognizer

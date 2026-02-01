@@ -2,7 +2,7 @@ from src.config import config
 from src.storage.interface import StorageProvider
 import logging
 from azure.core.exceptions import ResourceExistsError
-from azure.storage.blob import BlobServiceClient
+from azure.storage.blob import BlobServiceClient, ContentSettings
 from io import BytesIO
 
 logger = logging.getLogger(__name__)
@@ -36,7 +36,7 @@ class AzureStorage(StorageProvider):
             logger.error(f"Failed to initialize Azure Storage: {e}")
             self.blob_service_client = None
 
-    def save_file(self, file_data: bytes, filename: str) -> str:
+    def save_file(self, file_data: bytes, filename: str, content_type: str = None) -> str:
         if not self.container_client:
             logger.error("Azure container client not initialized.")
             return ""
@@ -48,7 +48,10 @@ class AzureStorage(StorageProvider):
             
             blob_client = self.container_client.get_blob_client(filename)
             logger.info(f"Uploading {filename} to Azure container {self.container_name}...")
-            blob_client.upload_blob(file_data, overwrite=True)
+            
+            content_settings = ContentSettings(content_type=content_type) if content_type else None
+            
+            blob_client.upload_blob(file_data, overwrite=True, content_settings=content_settings)
             return filename
         except Exception as e:
             logger.error(f"Failed to upload {filename} to Azure: {e}")
@@ -76,3 +79,23 @@ class AzureStorage(StorageProvider):
         except Exception as e:
             logger.error(f"Error getting file stream for {filename}: {e}")
             return None
+
+    def get_metadata(self, filename: str) -> dict:
+        if not self.container_client:
+            return {}
+        try:
+            blob_client = self.container_client.get_blob_client(filename)
+            properties = blob_client.get_blob_properties()
+            return properties.metadata or {}
+        except Exception as e:
+            logger.error(f"Failed to get metadata for {filename}: {e}")
+            return {}
+
+    def update_metadata(self, filename: str, metadata: dict) -> None:
+        if not self.container_client:
+            return
+        try:
+            blob_client = self.container_client.get_blob_client(filename)
+            blob_client.set_blob_metadata(metadata)
+        except Exception as e:
+            logger.error(f"Failed to update metadata for {filename}: {e}")

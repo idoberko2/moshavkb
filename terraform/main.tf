@@ -101,6 +101,16 @@ resource "azurerm_cognitive_deployment" "embedding" {
 }
 
 
+# --- Azure AI Document Intelligence (Form Recognizer) ---
+resource "azurerm_cognitive_account" "doc_intel" {
+  name                  = "${var.resource_group_name}-docintel-${random_id.random.hex}"
+  location              = var.doc_intel_location
+  resource_group_name   = azurerm_resource_group.rg.name
+  kind                  = "FormRecognizer"
+  sku_name              = var.doc_intel_sku_name
+  custom_subdomain_name = "${var.resource_group_name}-docintel-${random_id.random.hex}"
+}
+
 # --- Networking ---
 resource "azurerm_virtual_network" "vnet" {
   name                = "${var.resource_group_name}-vnet"
@@ -225,6 +235,10 @@ AZURE_OPENAI_API_VERSION="2024-02-15-preview"
 AZURE_DEPLOYMENT_NAME="${azurerm_cognitive_deployment.chat.name}"
 AZURE_EMBEDDING_DEPLOYMENT_NAME="${azurerm_cognitive_deployment.embedding.name}"
 
+# Azure AI Document Intelligence Credentials
+AZURE_DOC_INTEL_ENDPOINT="${azurerm_cognitive_account.doc_intel.endpoint}"
+AZURE_DOC_INTEL_KEY="${azurerm_cognitive_account.doc_intel.primary_access_key}"
+
 # Providers
 LLM_PROVIDER="azure"
 STORAGE_PROVIDER="azure"
@@ -249,4 +263,8 @@ output "storage_account_name" {
 
 output "openai_endpoint" {
   value = azurerm_cognitive_account.openai.endpoint
+}
+
+output "doc_intel_endpoint" {
+  value = azurerm_cognitive_account.doc_intel.endpoint
 }

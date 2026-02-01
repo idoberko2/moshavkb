@@ -5,7 +5,11 @@ from src.config import config
 import asyncio
 import hashlib
 from src.db import chroma
-from src.ingest.parser import parse_pdf
+from src.ingest.parser import parse_pdf, create_documents_from_chunks
+from src.ocr.document_intelligence import DocumentIntelligenceWrapper
+from src.ingest.chunker import chunk_text
+from io import BytesIO
+from datetime import datetime
 import logging
 
 
@@ -13,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 # Initialize storage
 storage = StorageFactory.get_storage_provider()
+doc_intel_client = DocumentIntelligenceWrapper()  # New Client
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -89,15 +94,44 @@ def process_document(file_name, file_content):
                 return "DUPLICATE_DIFF_NAME", existing_filename
 
         # 3. Save file to storage (only if new)
-        storage.save_file(file_content, file_name)
+        storage.save_file(file_content, file_name, content_type='application/pdf')
         
         # 4. Parse PDF
         # We pass the hash so it gets embedded in metadata
         chunks = parse_pdf(file_name, file_content=file_content, file_hash=md5_hash)
         
         if not chunks:
-            logger.warning(f"No text extracted from {file_name}")
-            return "NO_TEXT", None
+            logger.info(f"Normal parsing failed/empty for {file_name}. Checking OCR with Document Intelligence...")
+            text = None
+            
+            # 4.2 Run OCR if needed
+            if not text:
+                logger.info("Running Azure AI Document Intelligence (Layout Model)...")
+                text = doc_intel_client.extract_text(BytesIO(file_content))
+                
+                if text:
+                    try: 
+                        logger.info("OCR successful. Saving sidecar and updating metadata.")
+                        storage.save_file(text.encode('utf-8'), f"{file_name}.txt", content_type='text/plain; charset=utf-8')
+                        storage.update_metadata(file_name, {'ocr': 'true'})
+                    except Exception as e:
+                         logger.error(f"Failed to save OCR results: {e}")
+
+            # 4.3 Process OCR text
+            if text:
+                text_chunks = chunk_text(text)
+                base_metadata = {
+                    "filename": file_name,
+                    "created_at": datetime.now().isoformat(),
+                    "page_count": 0,
+                    "file_hash": md5_hash,
+                    "ocr": "true"
+                }
+                
+                chunks = create_documents_from_chunks(text_chunks, base_metadata, file_name)
+            else:
+                 logger.warning(f"No text extracted from {file_name} (OCR failed or empty)")
+                 return "NO_TEXT", None
             
         # 5. Add to Chroma
         chroma.add_document(chunks)

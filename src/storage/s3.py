@@ -53,18 +53,23 @@ class S3Storage(StorageProvider):
                 logger.error(f"Failed to initialize S3 client: {e}")
                 self.s3_client = None
 
-    def save_file(self, file_data: bytes, filename: str) -> str:
+    def save_file(self, file_data: bytes, filename: str, content_type: str = None) -> str:
         if not self.s3_client:
             logger.error("S3 client not initialized.")
             return ""
 
         try:
             logger.info(f"Uploading {filename} to S3 bucket {self.bucket_name}...")
-            self.s3_client.put_object(
-                Bucket=self.bucket_name,
-                Key=filename,
-                Body=file_data
-            )
+            
+            put_args = {
+                'Bucket': self.bucket_name,
+                'Key': filename,
+                'Body': file_data
+            }
+            if content_type:
+                put_args['ContentType'] = content_type
+                
+            self.s3_client.put_object(**put_args)
             return filename
         except NoCredentialsError:
             logger.error("Credentials not available for S3 upload.")
@@ -99,3 +104,28 @@ class S3Storage(StorageProvider):
         except ClientError as e:
             logger.error(f"Error getting file stream for {filename}: {e}")
             return None
+
+    def get_metadata(self, filename: str) -> dict:
+        if not self.s3_client:
+            return {}
+        try:
+            response = self.s3_client.head_object(Bucket=self.bucket_name, Key=filename)
+            return response.get('Metadata', {})
+        except Exception as e:
+            logger.error(f"Failed to get metadata for {filename}: {e}")
+            return {}
+
+    def update_metadata(self, filename: str, metadata: dict) -> None:
+        if not self.s3_client:
+            return
+        try:
+            # S3 metadata update requires copying the object to itself
+            self.s3_client.copy_object(
+                Bucket=self.bucket_name,
+                Key=filename,
+                CopySource={'Bucket': self.bucket_name, 'Key': filename},
+                Metadata=metadata,
+                MetadataDirective='REPLACE'
+            )
+        except Exception as e:
+            logger.error(f"Failed to update metadata for {filename}: {e}")

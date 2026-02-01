@@ -41,20 +41,25 @@ def parse_pdf(filepath: str, file_content: bytes = None, file_hash: str = None):
         # Chunk the text
         text_chunks = chunk_text(text)
         
-        documents = []
-        for i, chunk in enumerate(text_chunks):
-            doc_id = f"{os.path.basename(filepath)}_part_{i}"
-            chunk_metadata = base_metadata.copy()
-            chunk_metadata["chunk_index"] = i
-            
-            documents.append({
-                "text": chunk,
-                "metadata": chunk_metadata,
-                "id": doc_id
-            })
-            
-        return documents
+        return create_documents_from_chunks(text_chunks, base_metadata, os.path.basename(filepath))
 
     except Exception as e:
         logger.error(f"Error parsing {filepath}: {e}")
         return []
+
+def create_documents_from_chunks(chunks: list[str], base_metadata: dict, filename: str) -> list[dict]:
+    """
+    Helper to format text chunks into document objects.
+    """
+    documents = []
+    for i, chunk in enumerate(chunks):
+        doc_id = f"{filename}_part_{i}"
+        chunk_metadata = base_metadata.copy()
+        chunk_metadata["chunk_index"] = i
+        
+        documents.append({
+            "text": chunk,
+            "metadata": chunk_metadata,
+            "id": doc_id
+        })
+    return documents

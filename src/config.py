@@ -39,6 +39,10 @@ class Config:
         self.AZURE_CONTAINER_NAME = os.getenv("AZURE_CONTAINER_NAME", "moshavkb")
         self.AZURE_BACKUP_CONTAINER_NAME = os.getenv("AZURE_BACKUP_CONTAINER_NAME", "moshavkb-backups")
         
+        # Azure AI Document Intelligence
+        self.AZURE_DOC_INTEL_ENDPOINT = os.getenv("AZURE_DOC_INTEL_ENDPOINT")
+        self.AZURE_DOC_INTEL_KEY = os.getenv("AZURE_DOC_INTEL_KEY")
+        
         # Logging
         self.LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 
