@@ -5,8 +5,7 @@ load_dotenv()
 
 class Config:
     def __init__(self):
-        self.OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-        self.LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openai").lower() # openai or azure
+        self.LLM_PROVIDER = "azure"
         
         # Azure OpenAI Configuration
         self.AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
@@ -26,15 +25,8 @@ class Config:
         self.INGEST_ALLOWED_USERS = self._parse_id_list("INGEST_ALLOWED_USERS")
         self.INGEST_ALLOWED_GROUPS = self._parse_id_list("INGEST_ALLOWED_GROUPS")
 
-        # S3 Configuration
-        self.S3_ENDPOINT_URL = os.getenv("S3_ENDPOINT_URL", "http://minio:9000")
-        self.S3_ACCESS_KEY_ID = os.getenv("S3_ACCESS_KEY_ID", "minioadmin")
-        self.S3_SECRET_ACCESS_KEY = os.getenv("S3_SECRET_ACCESS_KEY", "minioadmin")
-        self.S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "moshavkb")
-        self.S3_REGION_NAME = os.getenv("S3_REGION_NAME", "us-east-1")
-
         # Storage Provider
-        self.STORAGE_PROVIDER = os.getenv("STORAGE_PROVIDER", "s3").lower() # s3, azure
+        self.STORAGE_PROVIDER = "azure"
         self.AZURE_STORAGE_CONNECTION_STRING = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
         self.AZURE_CONTAINER_NAME = os.getenv("AZURE_CONTAINER_NAME", "moshavkb")
         self.AZURE_BACKUP_CONTAINER_NAME = os.getenv("AZURE_BACKUP_CONTAINER_NAME", "moshavkb-backups")
