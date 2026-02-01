@@ -8,7 +8,7 @@ class LocalStorage(StorageProvider):
         if not os.path.exists(self.base_dir):
             os.makedirs(self.base_dir)
 
-    def save_file(self, file_data: bytes, filename: str) -> str:
+    def save_file(self, file_data: bytes, filename: str, content_type: str = None) -> str:
         filepath = os.path.join(self.base_dir, filename)
         with open(filepath, 'wb') as f:
             f.write(file_data)
@@ -22,3 +22,11 @@ class LocalStorage(StorageProvider):
         if os.path.exists(filepath):
             return open(filepath, 'rb')
         return None
+
+    def get_metadata(self, filename: str) -> dict:
+        # Local storage doesn't support metadata in this simple implementation
+        return {}
+
+    def update_metadata(self, filename: str, metadata: dict) -> None:
+        # Local storage doesn't support metadata
+        pass

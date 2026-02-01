@@ -1,8 +1,9 @@
 import chromadb
 from chromadb.config import Settings
 from src.config import config
-import os
 import logging
+
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +66,7 @@ def add_document(doc_data_list):
     )
     logger.info(f"Added {len(valid_docs)} document chunks.")
 
-def check_file_exists_by_hash(file_hash: str) -> str | None:
+def check_file_exists_by_hash(file_hash: str) -> Optional[str]:
     """
     Check if a file with the given MD5 hash already exists in the collection.
     Returns the filename if found, otherwise None.

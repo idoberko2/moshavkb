@@ -100,3 +100,17 @@ variable "embedding_model_version" {
   type        = string
   default     = "1"
 }
+
+# --- Azure AI Document Intelligence ---
+variable "doc_intel_sku_name" {
+  description = "SKU for Azure AI Document Intelligence"
+  type        = string
+  default     = "S0"
+}
+
+variable "doc_intel_location" {
+  description = "Region for Azure AI Document Intelligence"
+  type        = string
+  default     = "East US"
+}
+
