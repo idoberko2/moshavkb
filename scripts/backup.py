@@ -3,7 +3,6 @@ import shutil
 import datetime
 import tarfile
 import logging
-from src.storage.factory import StorageFactory
 from src.config import config
 
 # Setup logging
@@ -24,11 +23,9 @@ def backup_chroma():
 
     # Initialize Storage Provider
     try:
-        if config.STORAGE_PROVIDER == "azure":
-             from src.storage.azure import AzureStorage
-             storage = AzureStorage(container_name=config.AZURE_BACKUP_CONTAINER_NAME)
-        else:
-             storage = StorageFactory.get_storage_provider()
+        # use Azure Storage
+        from src.storage.azure import AzureStorage
+        storage = AzureStorage(container_name=config.AZURE_BACKUP_CONTAINER_NAME)
     except Exception as e:
         logger.error(f"Failed to initialize storage provider: {e}")
         return
@@ -45,7 +42,7 @@ def backup_chroma():
             tar.add(chroma_data_dir, arcname=os.path.basename(chroma_data_dir))
         
         # 2. Read and Upload
-        logger.info(f"Uploading to {config.STORAGE_PROVIDER} storage at {remote_path}...")
+        logger.info(f"Uploading to Azure storage at {remote_path}...")
         
         # Note: Reading entire file into memory. 
         # For very large backups, we should extend StorageProvider to support file_path upload.

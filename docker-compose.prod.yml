@@ -9,7 +9,6 @@ services:
             - ./data:/app/data
         environment:
             - PYTHONUNBUFFERED=1
-            - OPENAI_API_KEY=${OPENAI_API_KEY:-}
             - TELEGRAM_QUERY_BOT_TOKEN=${TELEGRAM_QUERY_BOT_TOKEN}
             - OPIK_API_KEY=${OPIK_API_KEY}
             - OPIK_WORKSPACE=${OPIK_WORKSPACE}
@@ -21,23 +20,12 @@ services:
             - QUERY_ALLOWED_GROUPS=${QUERY_ALLOWED_GROUPS}
             - ANONYMIZED_TELEMETRY=False
 
-            # Provider Selection
-            - LLM_PROVIDER=${LLM_PROVIDER:-openai}
-            - STORAGE_PROVIDER=${STORAGE_PROVIDER:-s3}
-
             # Azure OpenAI
             - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY:-}
             - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT:-}
             - AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION:-}
             - AZURE_DEPLOYMENT_NAME=${AZURE_DEPLOYMENT_NAME:-}
             - AZURE_EMBEDDING_DEPLOYMENT_NAME=${AZURE_EMBEDDING_DEPLOYMENT_NAME:-}
-
-            # S3 Configuration
-            - S3_ENDPOINT_URL=${S3_ENDPOINT_URL:-}
-            - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID:-}
-            - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY:-}
-            - S3_BUCKET_NAME=${S3_BUCKET_NAME:-}
-            - S3_REGION_NAME=${S3_REGION_NAME:-}
 
             # Azure Storage
             - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING:-}
@@ -56,7 +44,6 @@ services:
             - ./data:/app/data
         environment:
             - PYTHONUNBUFFERED=1
-            - OPENAI_API_KEY=${OPENAI_API_KEY:-}
             - TELEGRAM_INGESTION_BOT_TOKEN=${TELEGRAM_INGESTION_BOT_TOKEN}
             - DOCUMENT_DIR=/app/data/documents
             - CHROMA_HOST=chroma-db
@@ -65,24 +52,12 @@ services:
             - INGEST_ALLOWED_GROUPS=${INGEST_ALLOWED_GROUPS}
             - ANONYMIZED_TELEMETRY=False
 
-            # Provider Selection
-            - LLM_PROVIDER=${LLM_PROVIDER:-openai}
-            - STORAGE_PROVIDER=${STORAGE_PROVIDER:-s3}
-
             # Azure OpenAI
             - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY:-}
             - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT:-}
             - AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION:-}
             - AZURE_DEPLOYMENT_NAME=${AZURE_DEPLOYMENT_NAME:-}
             - AZURE_EMBEDDING_DEPLOYMENT_NAME=${AZURE_EMBEDDING_DEPLOYMENT_NAME:-}
-
-            # S3 Configuration
-            - S3_ENDPOINT_URL=${S3_ENDPOINT_URL:-}
-            - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID:-}
-            - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY:-}
-            - S3_BUCKET_NAME=${S3_BUCKET_NAME:-}
-            - S3_BACKUP_BUCKET_NAME=${S3_BACKUP_BUCKET_NAME:-}
-            - S3_REGION_NAME=${S3_REGION_NAME:-}
 
             # Azure Storage
             - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING:-}

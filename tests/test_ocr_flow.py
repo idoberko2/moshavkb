@@ -11,10 +11,15 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.modules["telegram"] = MagicMock()
 sys.modules["telegram.ext"] = MagicMock()
 sys.modules["dotenv"] = MagicMock()
+sys.modules["chromadb"] = MagicMock()
+sys.modules["chromadb.config"] = MagicMock()
+sys.modules["chromadb.utils"] = MagicMock()
+sys.modules["chromadb.utils.embedding_functions"] = MagicMock()
 sys.modules["azure"] = MagicMock()
 sys.modules["msrest"] = MagicMock()
 sys.modules["msrest.authentication"] = MagicMock()
 sys.modules["azure.core"] = MagicMock()
+sys.modules["azure.core.credentials"] = MagicMock()
 sys.modules["azure.core.exceptions"] = MagicMock()
 sys.modules["azure.storage"] = MagicMock()
 sys.modules["azure.storage.blob"] = MagicMock()
@@ -71,7 +76,7 @@ class TestOCRFlow(unittest.TestCase):
         mock_doc_intel.extract_text.assert_called_once()
         
         # Verify Sidecar Saved
-        mock_storage.save_file.assert_any_call(b"Extracted Hebrew Text", "scanned.pdf.txt")
+        mock_storage.save_file.assert_any_call(b"Extracted Hebrew Text", "scanned.pdf.txt", content_type='text/plain; charset=utf-8')
         
         # Verify Metadata Updated
         mock_storage.update_metadata.assert_called_with("scanned.pdf", {'ocr': 'true'})

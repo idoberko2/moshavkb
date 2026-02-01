@@ -1,5 +1,5 @@
 from src.config import config
-from src.storage.s3 import S3Storage
+from src.storage.azure import AzureStorage
 import logging
 
 logger = logging.getLogger(__name__)
@@ -8,14 +8,8 @@ class StorageFactory:
     @staticmethod
     def get_storage_provider():
         """
-        Returns the appropriate storage provider (S3 or Azure) based on config.
+        Returns the appropriate storage provider (Azure).
         """
-        provider = getattr(config, "STORAGE_PROVIDER", "s3").lower()
-        
-        if provider == "azure":
-            logger.info("Initializing Azure Native Storage Provider")
-            from src.storage.azure import AzureStorage
-            return AzureStorage()
-        else:
-            logger.info("Initializing S3 Storage Provider (Default)")
-            return S3Storage()
+        # Hardcoded to Azure as we removed S3 support
+        logger.info("Initializing Azure Native Storage Provider")
+        return AzureStorage()
