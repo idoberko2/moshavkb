@@ -6,8 +6,14 @@ from src.llm.factory import LLMFactory
 
 logger = logging.getLogger(__name__)
 
-# Initialize OpenAI/Azure client
-client = LLMFactory.get_llm_client()
+# Initialize OpenAI/Azure client lazily
+_client = None
+
+def get_client():
+    global _client
+    if _client is None:
+        _client = LLMFactory.get_llm_client()
+    return _client
 
 import json
 
@@ -85,6 +91,7 @@ def construct_system_prompt(context_chunks: list) -> str:
 
 @track
 def call_llm(system_prompt: str, query: str) -> dict:
+    client = get_client()
     return client.chat.completions.create(
         model=config.AZURE_DEPLOYMENT_NAME if config.LLM_PROVIDER == "azure" else "gpt-4o-mini",
         messages=[
