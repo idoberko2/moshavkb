@@ -62,6 +62,10 @@ services:
       - AZURE_DEPLOYMENT_NAME=${AZURE_DEPLOYMENT_NAME:-}
       - AZURE_EMBEDDING_DEPLOYMENT_NAME=${AZURE_EMBEDDING_DEPLOYMENT_NAME:-}
 
+      # Azure Document Intelligence
+      - AZURE_DOC_INTEL_ENDPOINT=${AZURE_DOC_INTEL_ENDPOINT:-}
+      - AZURE_DOC_INTEL_KEY=${AZURE_DOC_INTEL_KEY:-}
+
       # Azure Storage (Local Emulator)
       - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING:-DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;}
       - AZURE_CONTAINER_NAME=${AZURE_CONTAINER_NAME:-moshavkb}
