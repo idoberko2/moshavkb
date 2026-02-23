@@ -43,6 +43,12 @@ resource "azurerm_storage_container" "sc_backup" {
   container_access_type = "private"
 }
 
+resource "azurerm_storage_container" "sc_kehilatitkb" {
+  name                  = var.kehilatitkb_container_name
+  storage_account_name  = azurerm_storage_account.sa.name
+  container_access_type = "private"
+}
+
 resource "azurerm_storage_container" "sc_test" {
   name                  = "tests"
   storage_account_name  = azurerm_storage_account.sa.name
@@ -227,6 +233,8 @@ cat <<EOT >> /home/${var.admin_username}/moshavkb/.env
 AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=${azurerm_storage_account.sa.name};AccountKey=${azurerm_storage_account.sa.primary_access_key};EndpointSuffix=core.windows.net"
 AZURE_CONTAINER_NAME="${azurerm_storage_container.sc.name}"
 AZURE_BACKUP_CONTAINER_NAME="${azurerm_storage_container.sc_backup.name}"
+
+KEHILATITKB_AZURE_CONTAINER_NAME="${azurerm_storage_container.sc_kehilatitkb.name}"
 
 # Azure OpenAI Credentials
 AZURE_OPENAI_API_KEY="${azurerm_cognitive_account.openai.primary_access_key}"

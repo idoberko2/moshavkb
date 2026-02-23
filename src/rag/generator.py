@@ -38,7 +38,7 @@ SYSTEM_PROMPT = """
 {context}
 """
 
-@track
+@track(tags=[f"tenant:{config.TENANT_NAME}"])
 def generate_answer(query: str, context_chunks: list) -> dict:
     """
     Generates an answer using OpenAI based on the query and context.
@@ -68,7 +68,7 @@ def generate_answer(query: str, context_chunks: list) -> dict:
             "sources": []
         }
 
-@track
+@track(tags=[f"tenant:{config.TENANT_NAME}"])
 def construct_system_prompt(context_chunks: list) -> str:
     """
     Constructs the system prompt with context and a list of valid filenames.
@@ -89,7 +89,7 @@ def construct_system_prompt(context_chunks: list) -> str:
     return SYSTEM_PROMPT.format(file_list=file_list_str, context=context_text)
 
 
-@track
+@track(tags=[f"tenant:{config.TENANT_NAME}"])
 def call_llm(system_prompt: str, query: str) -> dict:
     client = get_client()
     return client.chat.completions.create(
