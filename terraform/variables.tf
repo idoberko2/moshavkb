@@ -46,6 +46,12 @@ variable "backup_container_name" {
   default     = "moshavkb-backups"
 }
 
+variable "kehilatitkb_container_name" {
+  description = "Name of the storage container for kehilatitkb documents"
+  type        = string
+  default     = "kehilatitkb"
+}
+
 variable "tfstate_container_name" {
   description = "Name of the storage container for terraform state"
   type        = string

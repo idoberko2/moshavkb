@@ -4,6 +4,17 @@ import os
 import logging
 import json
 
+# Ensure scripts/ is on path for tenant_config
+sys.path.append(os.path.join(os.path.dirname(__file__)))
+from tenant_config import apply_tenant, add_tenant_argument
+
+# Parse args BEFORE importing src.config
+parser = argparse.ArgumentParser(description="Dump all chunks for a specific file from ChromaDB.")
+add_tenant_argument(parser)
+parser.add_argument("filename", help="The exact filename to inspect.")
+args = parser.parse_args()
+apply_tenant(args.tenant)
+
 # Ensure src can be imported
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -14,7 +25,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def inspect_file(filename: str):
-    print(f"Inspecting file: '{filename}'")
+    print(f"Inspecting file: '{filename}' (tenant: {args.tenant})")
     
     collection = get_collection()
     
@@ -50,8 +61,4 @@ def inspect_file(filename: str):
         print("-" * 40)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Dump all chunks for a specific file from ChromaDB.")
-    parser.add_argument("filename", help="The exact filename to inspect.")
-    args = parser.parse_args()
-    
     inspect_file(args.filename)

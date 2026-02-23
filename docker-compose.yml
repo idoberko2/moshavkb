@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # Telegram Bot (Query/RAG)
+  # Telegram Bot (Query/RAG) - moshavkb tenant
   mkb-query-bot:
     build: .
     container_name: mkb-query-bot
@@ -17,6 +17,8 @@ services:
       - DOCUMENT_DIR=/app/data/documents
       - CHROMA_HOST=chroma-db
       - CHROMA_PORT=8000
+      - COLLECTION_NAME=moshav_protocols
+      - TENANT_NAME=moshavkb
       - QUERY_ALLOWED_USERS=${QUERY_ALLOWED_USERS}
       - QUERY_ALLOWED_GROUPS=${QUERY_ALLOWED_GROUPS}
       - ANONYMIZED_TELEMETRY=False
@@ -38,7 +40,7 @@ services:
     restart: always
     command: python -m src.query_bot.main
 
-  # Telegram Bot (Ingestion)
+  # Telegram Bot (Ingestion) - moshavkb tenant
   mkb-ingest-bot:
     build: .
     container_name: mkb-ingest-bot
@@ -51,6 +53,8 @@ services:
       - DOCUMENT_DIR=/app/data/documents
       - CHROMA_HOST=chroma-db
       - CHROMA_PORT=8000
+      - COLLECTION_NAME=moshav_protocols
+      - TENANT_NAME=moshavkb
       - INGEST_ALLOWED_USERS=${INGEST_ALLOWED_USERS}
       - INGEST_ALLOWED_GROUPS=${INGEST_ALLOWED_GROUPS}
       - ANONYMIZED_TELEMETRY=False
@@ -76,6 +80,83 @@ services:
     restart: always
     command: python -m src.ingest_bot.main
 
+  # Telegram Bot (Query/RAG) - kehilatitkb tenant
+  kehilatitkb-query-bot:
+    build: .
+    container_name: kehilatitkb-query-bot
+    volumes:
+      - .:/app
+      - ./data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TELEGRAM_QUERY_BOT_TOKEN=${KEHILATITKB_TELEGRAM_QUERY_BOT_TOKEN}
+      - OPIK_API_KEY=${OPIK_API_KEY}
+      - OPIK_WORKSPACE=${OPIK_WORKSPACE}
+      - OPIK_PROJECT_NAME=${OPIK_PROJECT_NAME}
+      - DOCUMENT_DIR=/app/data/documents
+      - CHROMA_HOST=chroma-db
+      - CHROMA_PORT=8000
+      - COLLECTION_NAME=kehilatitkb_protocols
+      - TENANT_NAME=kehilatitkb
+      - QUERY_ALLOWED_USERS=${KEHILATITKB_QUERY_ALLOWED_USERS}
+      - QUERY_ALLOWED_GROUPS=${KEHILATITKB_QUERY_ALLOWED_GROUPS}
+      - ANONYMIZED_TELEMETRY=False
+
+      # Azure OpenAI (shared)
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY:-}
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT:-}
+      - AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION:-}
+      - AZURE_DEPLOYMENT_NAME=${AZURE_DEPLOYMENT_NAME:-}
+      - AZURE_EMBEDDING_DEPLOYMENT_NAME=${AZURE_EMBEDDING_DEPLOYMENT_NAME:-}
+
+      # Azure Storage (Local Emulator)
+      - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING:-DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;}
+      - AZURE_CONTAINER_NAME=${KEHILATITKB_AZURE_CONTAINER_NAME:-kehilatitkb}
+
+    depends_on:
+      - chroma-db
+    restart: always
+    command: python -m src.query_bot.main
+
+  # Telegram Bot (Ingestion) - kehilatitkb tenant
+  kehilatitkb-ingest-bot:
+    build: .
+    container_name: kehilatitkb-ingest-bot
+    volumes:
+      - .:/app
+      - ./data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TELEGRAM_INGESTION_BOT_TOKEN=${KEHILATITKB_TELEGRAM_INGESTION_BOT_TOKEN}
+      - DOCUMENT_DIR=/app/data/documents
+      - CHROMA_HOST=chroma-db
+      - CHROMA_PORT=8000
+      - COLLECTION_NAME=kehilatitkb_protocols
+      - TENANT_NAME=kehilatitkb
+      - INGEST_ALLOWED_USERS=${KEHILATITKB_INGEST_ALLOWED_USERS}
+      - INGEST_ALLOWED_GROUPS=${KEHILATITKB_INGEST_ALLOWED_GROUPS}
+      - ANONYMIZED_TELEMETRY=False
+
+      # Azure OpenAI (shared)
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY:-}
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT:-}
+      - AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION:-}
+      - AZURE_DEPLOYMENT_NAME=${AZURE_DEPLOYMENT_NAME:-}
+      - AZURE_EMBEDDING_DEPLOYMENT_NAME=${AZURE_EMBEDDING_DEPLOYMENT_NAME:-}
+
+      # Azure Document Intelligence
+      - AZURE_DOC_INTEL_ENDPOINT=${AZURE_DOC_INTEL_ENDPOINT:-}
+      - AZURE_DOC_INTEL_KEY=${AZURE_DOC_INTEL_KEY:-}
+
+      # Azure Storage (Local Emulator)
+      - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING:-DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;}
+      - AZURE_CONTAINER_NAME=${KEHILATITKB_AZURE_CONTAINER_NAME:-kehilatitkb}
+
+    depends_on:
+      - chroma-db
+    restart: always
+    command: python -m src.ingest_bot.main
+
   # ChromaDB Vector Store
   chroma-db:
     image: chromadb/chroma:latest
@@ -93,6 +174,8 @@ services:
     image: mcr.microsoft.com/azure-storage/azurite
     container_name: moshavkb-azurite
     command: "azurite-blob --blobHost 0.0.0.0 --blobPort 10000 --skipApiVersionCheck"
+    volumes:
+      - ./data/azurite:/data
     ports:
       - "10000:10000"
     restart: always
@@ -103,4 +186,4 @@ services:
     depends_on:
       - azurite
     command: >
-      bash -c " echo 'Waiting for Azurite...'; sleep 5; echo 'Creating containers...'; az storage container create --name moshavkb --connection-string 'DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;'; az storage container create --name moshavkb-backups --connection-string 'DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;'; echo 'Containers created.'; "
+      bash -c " echo 'Waiting for Azurite...'; sleep 5; echo 'Creating containers...'; az storage container create --name moshavkb --connection-string 'DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;'; az storage container create --name moshavkb-backups --connection-string 'DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;'; az storage container create --name kehilatitkb --connection-string 'DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;'; echo 'Containers created.'; "

@@ -1,5 +1,19 @@
+import os
+import sys
 import logging
 import argparse
+
+# Ensure scripts/ is on path for tenant_config
+sys.path.append(os.path.join(os.path.dirname(__file__)))
+from tenant_config import apply_tenant, add_tenant_argument
+
+# Parse args BEFORE importing src.config
+parser = argparse.ArgumentParser(description="Delete a file from ChromaDB by filename.")
+add_tenant_argument(parser)
+parser.add_argument("filename", help="The exact filename to delete (as stored in metadata).")
+args = parser.parse_args()
+apply_tenant(args.tenant)
+
 from src.db.chroma import get_collection
 
 logging.basicConfig(level=logging.INFO)
@@ -18,8 +32,4 @@ def delete_file(filename: str):
         logger.error(f"Failed to delete file {filename}: {e}")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Delete a file from ChromaDB by filename.")
-    parser.add_argument("filename", help="The exact filename to delete (as stored in metadata).")
-    args = parser.parse_args()
-    
     delete_file(args.filename)

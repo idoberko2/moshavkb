@@ -4,6 +4,18 @@ import os
 import logging
 import json
 
+# Ensure scripts/ is on path for tenant_config
+sys.path.append(os.path.join(os.path.dirname(__file__)))
+from tenant_config import apply_tenant, add_tenant_argument
+
+# Parse args BEFORE importing src.config
+parser = argparse.ArgumentParser(description="Query ChromaDB using the bot's search logic.")
+add_tenant_argument(parser)
+parser.add_argument("query", help="The text query to search for.")
+parser.add_argument("-n", "--n_results", type=int, default=5, help="Number of results to retrieve (default: 5)")
+args = parser.parse_args()
+apply_tenant(args.tenant)
+
 # Ensure src can be imported
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -11,7 +23,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 try:
     import opik
 except ImportError:
-    import sys
     from unittest.mock import MagicMock
     
     # Create a mock module
@@ -31,7 +42,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def query_chroma(query_text: str, n_results: int = 5):
-    print(f"Searching for: '{query_text}' (n={n_results})")
+    print(f"Searching for: '{query_text}' (tenant: {args.tenant}, n={n_results})")
     
     chunks = search_similar_docs(query_text, n_results)
     
@@ -50,10 +61,4 @@ def query_chroma(query_text: str, n_results: int = 5):
         print("-" * 40)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Query ChromaDB using the bot's search logic.")
-    parser.add_argument("query", help="The text query to search for.")
-    parser.add_argument("-n", "--n_results", type=int, default=5, help="Number of results to retrieve (default: 5)")
-    
-    args = parser.parse_args()
-    
     query_chroma(args.query, args.n_results)

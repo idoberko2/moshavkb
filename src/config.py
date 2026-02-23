@@ -17,7 +17,8 @@ class Config:
         self.CHROMA_HOST = os.getenv("CHROMA_HOST", "chroma-db")
         self.CHROMA_PORT = int(os.getenv("CHROMA_PORT", 8000))
         self.DOCUMENT_DIR = os.getenv("DOCUMENT_DIR", "./data/documents")
-        self.COLLECTION_NAME = "moshav_protocols"
+        self.TENANT_NAME = os.getenv("TENANT_NAME", "moshavkb")
+        self.COLLECTION_NAME = os.getenv("COLLECTION_NAME", "moshav_protocols")
         
         # Load whitelists once
         self.QUERY_ALLOWED_USERS = self._parse_id_list("QUERY_ALLOWED_USERS")

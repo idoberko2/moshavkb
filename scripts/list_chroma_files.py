@@ -1,5 +1,16 @@
 import sys
 import os
+import argparse
+
+# Ensure scripts/ is on path for tenant_config
+sys.path.append(os.path.join(os.path.dirname(__file__)))
+from tenant_config import apply_tenant, add_tenant_argument
+
+# Parse args BEFORE importing src.config
+parser = argparse.ArgumentParser(description="List all files stored in ChromaDB.")
+add_tenant_argument(parser)
+args = parser.parse_args()
+apply_tenant(args.tenant)
 
 # Add src to path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
@@ -29,6 +40,8 @@ def list_files():
             if meta and 'filename' in meta:
                 unique_files.add(meta['filename'])
         
+        print(f"Tenant: {args.tenant}")
+        print(f"Collection: {config.COLLECTION_NAME}")
         print(f"Total Chunks: {total_chunks}")
         print(f"Unique Files ({len(unique_files)}):")
         print("-" * 30)

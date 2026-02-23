@@ -5,7 +5,7 @@ from opik import track
 
 logger = logging.getLogger(__name__)
 
-@track
+@track(tags=[f"tenant:{config.TENANT_NAME}"])
 def search_similar_docs(query_text: str, n_results: int = 5):
     """
     Searches for documents in ChromaDB similar to the query text.

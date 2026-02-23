@@ -1,85 +1,162 @@
 version: '3.8'
 
 services:
-    # Telegram Bot (Query/RAG)
-    mkb-query-bot:
-        image: ghcr.io/idoberko2/moshavkb:${IMAGE_TAG:-latest}
-        container_name: mkb-query-bot
-        volumes:
-            - ./data:/app/data
-        environment:
-            - PYTHONUNBUFFERED=1
-            - TELEGRAM_QUERY_BOT_TOKEN=${TELEGRAM_QUERY_BOT_TOKEN}
-            - OPIK_API_KEY=${OPIK_API_KEY}
-            - OPIK_WORKSPACE=${OPIK_WORKSPACE}
-            - OPIK_PROJECT_NAME=${OPIK_PROJECT_NAME}
-            - DOCUMENT_DIR=/app/data/documents
-            - CHROMA_HOST=chroma-db
-            - CHROMA_PORT=8000
-            - QUERY_ALLOWED_USERS=${QUERY_ALLOWED_USERS}
-            - QUERY_ALLOWED_GROUPS=${QUERY_ALLOWED_GROUPS}
-            - ANONYMIZED_TELEMETRY=False
+  # Telegram Bot (Query/RAG) - moshavkb tenant
+  mkb-query-bot:
+    image: ghcr.io/idoberko2/moshavkb:${IMAGE_TAG:-latest}
+    container_name: mkb-query-bot
+    volumes:
+      - ./data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TELEGRAM_QUERY_BOT_TOKEN=${TELEGRAM_QUERY_BOT_TOKEN}
+      - OPIK_API_KEY=${OPIK_API_KEY}
+      - OPIK_WORKSPACE=${OPIK_WORKSPACE}
+      - OPIK_PROJECT_NAME=${OPIK_PROJECT_NAME}
+      - DOCUMENT_DIR=/app/data/documents
+      - CHROMA_HOST=chroma-db
+      - CHROMA_PORT=8000
+      - COLLECTION_NAME=moshav_protocols
+      - TENANT_NAME=moshavkb
+      - QUERY_ALLOWED_USERS=${QUERY_ALLOWED_USERS}
+      - QUERY_ALLOWED_GROUPS=${QUERY_ALLOWED_GROUPS}
+      - ANONYMIZED_TELEMETRY=False
 
-            # Azure OpenAI
-            - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY:-}
-            - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT:-}
-            - AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION:-}
-            - AZURE_DEPLOYMENT_NAME=${AZURE_DEPLOYMENT_NAME:-}
-            - AZURE_EMBEDDING_DEPLOYMENT_NAME=${AZURE_EMBEDDING_DEPLOYMENT_NAME:-}
+      # Azure OpenAI
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY:-}
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT:-}
+      - AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION:-}
+      - AZURE_DEPLOYMENT_NAME=${AZURE_DEPLOYMENT_NAME:-}
+      - AZURE_EMBEDDING_DEPLOYMENT_NAME=${AZURE_EMBEDDING_DEPLOYMENT_NAME:-}
 
-            # Azure Storage
-            - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING:-}
-            - AZURE_CONTAINER_NAME=${AZURE_CONTAINER_NAME:-moshavkb}
-            - AZURE_BACKUP_CONTAINER_NAME=${AZURE_BACKUP_CONTAINER_NAME:-moshavkb-backups}
-        depends_on:
-            - chroma-db
-        restart: always
-        command: python -m src.query_bot.main
+      # Azure Storage
+      - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING:-}
+      - AZURE_CONTAINER_NAME=${AZURE_CONTAINER_NAME:-moshavkb}
+      - AZURE_BACKUP_CONTAINER_NAME=${AZURE_BACKUP_CONTAINER_NAME:-moshavkb-backups}
+    depends_on:
+      - chroma-db
+    restart: always
+    command: python -m src.query_bot.main
 
-    # Telegram Bot (Ingestion)
-    mkb-ingest-bot:
-        image: ghcr.io/idoberko2/moshavkb:${IMAGE_TAG:-latest}
-        container_name: mkb-ingest-bot
-        volumes:
-            - ./data:/app/data
-        environment:
-            - PYTHONUNBUFFERED=1
-            - TELEGRAM_INGESTION_BOT_TOKEN=${TELEGRAM_INGESTION_BOT_TOKEN}
-            - DOCUMENT_DIR=/app/data/documents
-            - CHROMA_HOST=chroma-db
-            - CHROMA_PORT=8000
-            - INGEST_ALLOWED_USERS=${INGEST_ALLOWED_USERS}
-            - INGEST_ALLOWED_GROUPS=${INGEST_ALLOWED_GROUPS}
-            - ANONYMIZED_TELEMETRY=False
+  # Telegram Bot (Ingestion) - moshavkb tenant
+  mkb-ingest-bot:
+    image: ghcr.io/idoberko2/moshavkb:${IMAGE_TAG:-latest}
+    container_name: mkb-ingest-bot
+    volumes:
+      - ./data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TELEGRAM_INGESTION_BOT_TOKEN=${TELEGRAM_INGESTION_BOT_TOKEN}
+      - DOCUMENT_DIR=/app/data/documents
+      - CHROMA_HOST=chroma-db
+      - CHROMA_PORT=8000
+      - COLLECTION_NAME=moshav_protocols
+      - TENANT_NAME=moshavkb
+      - INGEST_ALLOWED_USERS=${INGEST_ALLOWED_USERS}
+      - INGEST_ALLOWED_GROUPS=${INGEST_ALLOWED_GROUPS}
+      - ANONYMIZED_TELEMETRY=False
 
-            # Azure OpenAI
-            - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY:-}
-            - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT:-}
-            - AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION:-}
-            - AZURE_DEPLOYMENT_NAME=${AZURE_DEPLOYMENT_NAME:-}
-            - AZURE_EMBEDDING_DEPLOYMENT_NAME=${AZURE_EMBEDDING_DEPLOYMENT_NAME:-}
+      # Azure OpenAI
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY:-}
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT:-}
+      - AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION:-}
+      - AZURE_DEPLOYMENT_NAME=${AZURE_DEPLOYMENT_NAME:-}
+      - AZURE_EMBEDDING_DEPLOYMENT_NAME=${AZURE_EMBEDDING_DEPLOYMENT_NAME:-}
 
-            # Azure Document Intelligence
-            - AZURE_DOC_INTEL_ENDPOINT=${AZURE_DOC_INTEL_ENDPOINT:-}
-            - AZURE_DOC_INTEL_KEY=${AZURE_DOC_INTEL_KEY:-}
+      # Azure Document Intelligence
+      - AZURE_DOC_INTEL_ENDPOINT=${AZURE_DOC_INTEL_ENDPOINT:-}
+      - AZURE_DOC_INTEL_KEY=${AZURE_DOC_INTEL_KEY:-}
 
-            # Azure Storage
-            - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING:-}
-            - AZURE_CONTAINER_NAME=${AZURE_CONTAINER_NAME:-moshavkb}
-            - AZURE_BACKUP_CONTAINER_NAME=${AZURE_BACKUP_CONTAINER_NAME:-moshavkb-backups}
-        depends_on:
-            - chroma-db
-        restart: always
-        command: python -m src.ingest_bot.main
+      # Azure Storage
+      - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING:-}
+      - AZURE_CONTAINER_NAME=${AZURE_CONTAINER_NAME:-moshavkb}
+      - AZURE_BACKUP_CONTAINER_NAME=${AZURE_BACKUP_CONTAINER_NAME:-moshavkb-backups}
+    depends_on:
+      - chroma-db
+    restart: always
+    command: python -m src.ingest_bot.main
 
-    # ChromaDB Vector Store
-    chroma-db:
-        image: chromadb/chroma:latest
-        container_name: chroma-db
-        volumes:
-            - ./data/chroma_db:/data
-        # No ports exposed to host for security, bots connect via internal docker network
-        environment:
-            - IS_PERSISTENT=TRUE
-            - ANONYMIZED_TELEMETRY=False
-        restart: always
+  # Telegram Bot (Query/RAG) - kehilatitkb tenant
+  kehilatitkb-query-bot:
+    image: ghcr.io/idoberko2/moshavkb:${IMAGE_TAG:-latest}
+    container_name: kehilatitkb-query-bot
+    volumes:
+      - ./data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TELEGRAM_QUERY_BOT_TOKEN=${KEHILATITKB_TELEGRAM_QUERY_BOT_TOKEN}
+      - OPIK_API_KEY=${OPIK_API_KEY}
+      - OPIK_WORKSPACE=${OPIK_WORKSPACE}
+      - OPIK_PROJECT_NAME=${OPIK_PROJECT_NAME}
+      - DOCUMENT_DIR=/app/data/documents
+      - CHROMA_HOST=chroma-db
+      - CHROMA_PORT=8000
+      - COLLECTION_NAME=kehilatitkb_protocols
+      - TENANT_NAME=kehilatitkb
+      - QUERY_ALLOWED_USERS=${KEHILATITKB_QUERY_ALLOWED_USERS}
+      - QUERY_ALLOWED_GROUPS=${KEHILATITKB_QUERY_ALLOWED_GROUPS}
+      - ANONYMIZED_TELEMETRY=False
+
+      # Azure OpenAI (shared)
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY:-}
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT:-}
+      - AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION:-}
+      - AZURE_DEPLOYMENT_NAME=${AZURE_DEPLOYMENT_NAME:-}
+      - AZURE_EMBEDDING_DEPLOYMENT_NAME=${AZURE_EMBEDDING_DEPLOYMENT_NAME:-}
+
+      # Azure Storage
+      - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING:-}
+      - AZURE_CONTAINER_NAME=${KEHILATITKB_AZURE_CONTAINER_NAME:-kehilatitkb}
+    depends_on:
+      - chroma-db
+    restart: always
+    command: python -m src.query_bot.main
+
+  # Telegram Bot (Ingestion) - kehilatitkb tenant
+  kehilatitkb-ingest-bot:
+    image: ghcr.io/idoberko2/moshavkb:${IMAGE_TAG:-latest}
+    container_name: kehilatitkb-ingest-bot
+    volumes:
+      - ./data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TELEGRAM_INGESTION_BOT_TOKEN=${KEHILATITKB_TELEGRAM_INGESTION_BOT_TOKEN}
+      - DOCUMENT_DIR=/app/data/documents
+      - CHROMA_HOST=chroma-db
+      - CHROMA_PORT=8000
+      - COLLECTION_NAME=kehilatitkb_protocols
+      - TENANT_NAME=kehilatitkb
+      - INGEST_ALLOWED_USERS=${KEHILATITKB_INGEST_ALLOWED_USERS}
+      - INGEST_ALLOWED_GROUPS=${KEHILATITKB_INGEST_ALLOWED_GROUPS}
+      - ANONYMIZED_TELEMETRY=False
+
+      # Azure OpenAI (shared)
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY:-}
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT:-}
+      - AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION:-}
+      - AZURE_DEPLOYMENT_NAME=${AZURE_DEPLOYMENT_NAME:-}
+      - AZURE_EMBEDDING_DEPLOYMENT_NAME=${AZURE_EMBEDDING_DEPLOYMENT_NAME:-}
+
+      # Azure Document Intelligence
+      - AZURE_DOC_INTEL_ENDPOINT=${AZURE_DOC_INTEL_ENDPOINT:-}
+      - AZURE_DOC_INTEL_KEY=${AZURE_DOC_INTEL_KEY:-}
+
+      # Azure Storage
+      - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING:-}
+      - AZURE_CONTAINER_NAME=${KEHILATITKB_AZURE_CONTAINER_NAME:-kehilatitkb}
+    depends_on:
+      - chroma-db
+    restart: always
+    command: python -m src.ingest_bot.main
+
+  # ChromaDB Vector Store
+  chroma-db:
+    image: chromadb/chroma:latest
+    container_name: chroma-db
+    volumes:
+      - ./data/chroma_db:/data
+    # No ports exposed to host for security, bots connect via internal docker network
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=False
+    restart: always

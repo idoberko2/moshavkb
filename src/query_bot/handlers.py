@@ -3,6 +3,7 @@ from telegram.ext import ContextTypes
 from src.rag.search import search_similar_docs
 from src.rag.generator import generate_answer
 from opik import track
+from src.config import config
 import logging
 
 logger = logging.getLogger(__name__)
@@ -21,7 +22,7 @@ storage = StorageFactory.get_storage_provider()
 
 
 
-@track
+@track(tags=[f"tenant:{config.TENANT_NAME}"])
 async def process_query_logic(query_text: str) -> dict:
     """
     Core logic for handling a query. Returns a dict containing 'answer' and 'sources' list.
